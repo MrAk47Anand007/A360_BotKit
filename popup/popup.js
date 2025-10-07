@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * @returns bool - true or false based on URL provided if it is A360 based URL then true else false
      */
     function isA360BotPage(url) {
-        const pattern = /#\/bots\/repository\/private\/taskbots\//;
+        const pattern = /#\/bots\/repository\/private\/.*\/\d+\/edit$/;
         return pattern.test(url);
     }
 
