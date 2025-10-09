@@ -1,12 +1,10 @@
 {
   "manifest_version": 3,
   "name": "Bot Logging Enhancer",
-  "version": "1.0",
+  "version": "1.1",
   "description": "A Chrome extension to enhance bot logging with line numbers.",
   "permissions": [
-    "activeTab",
-    "storage",
-    "scripting"
+    "activeTab"
   ],
   "background": {
     "service_worker": "background/background.js",
