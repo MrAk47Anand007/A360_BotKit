@@ -12,10 +12,6 @@ import { calculateTotalLines, updateLogMessages, countLinesAccurately,  getBotCo
             getBotContent(request.origin, request.fileID, request.authToken)
                 .then((response) => {
                     if (response && response.success) {
-                        console.log(
-                            "Full bot content:",
-                            JSON.stringify(response.botContent, null, 2)
-                        );
                         try {
                             let lineCount = calculateTotalLines(response.botContent); // Calculate line count
                             console.log("Calculated line count:", lineCount);

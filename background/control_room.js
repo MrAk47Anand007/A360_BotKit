@@ -52,7 +52,6 @@ export async function putBotJSONContent(
     const botContentURI = "/v2/repository/files/<fileID>/content";
     // Construct the full URL for the API request
     let botContentURL = origin + botContentURI.replace("<fileID>", fileID);
-    console.log(botContentURL);
 
     // Set up headers including content type and authorization token
     let myHeaders = new Headers();
@@ -65,7 +64,6 @@ export async function putBotJSONContent(
         headers: myHeaders,
         body: JSON.stringify(botJSONContent), // Convert the bot content to JSON
     };
-    console.log(requestOptions);
 
     try {
         // Perform the API request
@@ -96,8 +94,6 @@ export async function putBotJSONContentPaste(
     // Define the endpoint URI for fetching and updating bot content
     const botContentURI = "/v2/repository/files/<fileID>/content";
     const botContentURL = origin + botContentURI.replace("<fileID>", fileID);
-    console.log(botJSONContent);
-    console.log(authToken.slice(1, -1)); // Clean up the auth token
 
     // Parse the pasted JSON string into an object
     let botJSONContentVal;
@@ -109,8 +105,7 @@ export async function putBotJSONContentPaste(
     }
 
     let formattedBotJSONContent = JSON.stringify(botJSONContentVal, null, 2); // Format the JSON for readability
-    console.log(formattedBotJSONContent);
-    console.log(authToken);
+
 
     // Set up headers including content type and cleaned authorization token
     let myHeaders = new Headers();
@@ -123,12 +118,10 @@ export async function putBotJSONContentPaste(
         headers: myHeaders,
         body: formattedBotJSONContent, // Use the formatted JSON data
     };
-    console.log(JSON.parse(formattedBotJSONContent));
     try {
         // Perform the API request
         let response = await fetch(botContentURL, requestOptions);
         let json = await response.json(); // Parse the JSON response
-        console.log(json);
         if (!response.ok) throw new Error("Fetch failed"); // Check if the response is successful
         return { success: true, json }; // Return the updated bot content if successful
     } catch (error) {
@@ -185,75 +178,161 @@ export function calculateTotalLines(botContent) {
 /**
  * Function to update the log message in given bot
  * @param {*} botContent object - Takes bot content as input and update bot content based on new line numbers.
- * @param {*} logStructure string - Format of loggging in log to file action.
+ * @param {*} logStructure string - User's placeholder that needs to be replaced with line number
  * @returns object - Returns object of updated bot content.
  */
 export function updateLogMessages(botContent, logStructure) {
-
     let totalLineNumber = 0;
+
+    // --- Helpers to read/write log content correctly ---
+    function getLogContent(attribute) {
+        if (!attribute || !attribute.value) return { key: null, content: null };
+
+        const v = attribute.value;
+
+        // Common A360 fields
+        if (typeof v.expression === 'string') {
+            return { key: 'expression', content: v.expression };
+        }
+        if (typeof v.literal === 'string') {
+            return { key: 'literal', content: v.literal };
+        }
+        if (typeof v.value === 'string') {
+            return { key: 'value', content: v.value };
+        }
+        // Your case: { type: 'STRING', string: 'anand [linenumber]' }
+        if (typeof v.string === 'string') {
+            return { key: 'string', content: v.string };
+        }
+
+        // Fallback
+        if (typeof attribute.value === 'string') {
+            return { key: null, content: attribute.value };
+        }
+
+        return { key: null, content: null };
+    }
+
+    function setLogContent(attribute, key, newContent) {
+        if (!attribute) return;
+
+        if (key && attribute.value) {
+            attribute.value[key] = newContent;   // expression / literal / value / string
+        } else if (!key && typeof attribute.value === 'string') {
+            attribute.value = newContent;
+        }
+    }
+
+    // --- Core replacement logic ---
+    function applyPlaceholderReplacement(currentLogContent, totalLineNumber, logStructure) {
+        // If user provided a placeholder → use that
+        if (logStructure && logStructure.trim()) {
+            const rawPlaceholder = logStructure.trim();
+
+            // Escape regex meta chars so placeholder is treated literally
+            let escaped = rawPlaceholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // Allow flexible whitespace inside the placeholder
+            escaped = escaped.replace(/\s+/g, '\\s*');
+
+            const placeholderRegex = new RegExp(escaped, 'gi');
+
+            if (placeholderRegex.test(currentLogContent)) {
+                const trimmedPlaceholder = rawPlaceholder.trim();
+                let replacement = String(totalLineNumber);
+
+                // Generic wrapper detection:
+                // if first + last chars are non-alphanumeric, keep them
+                if (trimmedPlaceholder.length >= 3) {
+                    const firstChar = trimmedPlaceholder[0];
+                    const lastChar  = trimmedPlaceholder[trimmedPlaceholder.length - 1];
+
+                    const isWrapperChar = ch => /[^a-zA-Z0-9]/.test(ch); // any non-alphanumeric
+
+                    if (isWrapperChar(firstChar) && isWrapperChar(lastChar)) {
+                        const inner = trimmedPlaceholder.slice(1, -1);
+
+                        // If inner has spaces, format like "| 3 |"
+                        if (/\s/.test(inner)) {
+                            replacement = `${firstChar} ${totalLineNumber} ${lastChar}`;
+                        } else {
+                            // "[3]", "(3)", "#3#", "<3>"
+                            replacement = `${firstChar}${totalLineNumber}${lastChar}`;
+                        }
+                    }
+                }
+
+                return currentLogContent.replace(
+                    placeholderRegex,
+                    replacement
+                );
+            } else {
+                console.log('No match found for placeholder in log:', {
+                    currentLogContent,
+                    rawPlaceholder,
+                    regex: placeholderRegex.toString(),
+                    line: totalLineNumber
+                });
+                return currentLogContent;
+            }
+        }
+
+        // No placeholder → auto-detect existing patterns (your original behavior)
+        const regex = /\|\s*\d+\s*\|/;
+        const match = currentLogContent.match(regex);
+
+        if (match) {
+            return currentLogContent.replace(
+                regex,
+                `| ${totalLineNumber} |`
+            );
+        } else {
+            return currentLogContent.replace(
+                /-\d+-/,
+                `-${totalLineNumber}-`
+            );
+        }
+    }
 
     function processNode(node) {
         let lineCount = 0;
 
-        // Update line count if the node has a commandName attribute
         if (node.commandName) {
             lineCount += 1;
             totalLineNumber += 1;
 
-            // If the node is a logToFile command, update log content
-            if (node.commandName === "logToFile") {
+            if (node.commandName === "logToFile" && Array.isArray(node.attributes)) {
                 node.attributes.forEach((attribute) => {
                     if (attribute.name === "logContent") {
-                        let currentLogContent = attribute.value.expression;
+                        const { key, content } = getLogContent(attribute);
 
-                        // Use a regex to find the pattern | number | or update existing line numbers
-                        const regex = /\|\s*\d+\s*\|/;
-                        const match = currentLogContent.match(regex);
-
-                        if (match) {
-                            // Replace the number inside the pipe operators with the total line number
-                            currentLogContent = currentLogContent.replace(
-                                regex,
-                                `| ${totalLineNumber} |`
+                        if (!content || typeof content !== 'string') {
+                            console.warn(
+                                'Skipping log with invalid content at line',
+                                totalLineNumber,
+                                'attribute:',
+                                attribute
                             );
-                        } else {
-                            // Update existing line numbers in case of a different format
-                            currentLogContent = currentLogContent.replace(
-                                /-\d+-/,
-                                `-${totalLineNumber}-`
-                            );
+                            return;
                         }
 
-                        // Apply new log structure if provided
-                        if (logStructure && logStructure !== currentLogContent) {
-                            if (logStructure.includes("|line number|")) {
-                                currentLogContent = logStructure.replace(
-                                    "|line number|",
-                                    `| ${totalLineNumber} |`
-                                );
-                            } else {
-                                // If logStructure doesn't contain |line number|, assume it's the structure to replace
-                                currentLogContent = currentLogContent.replace(
-                                    logStructure,
-                                    `| ${totalLineNumber} |`
-                                );
-                            }
-                        }
+                        const updatedContent = applyPlaceholderReplacement(
+                            content,
+                            totalLineNumber,
+                            logStructure
+                        );
 
-                        attribute.value.expression = currentLogContent;
+                        setLogContent(attribute, key, updatedContent);
                     }
                 });
             }
         }
 
-        // Recursively process children nodes
         if (Array.isArray(node.children)) {
             for (let child of node.children) {
                 lineCount += processNode(child);
             }
         }
 
-        // Recursively process branches
         if (Array.isArray(node.branches)) {
             for (let branch of node.branches) {
                 lineCount += processNode(branch);
@@ -263,7 +342,6 @@ export function updateLogMessages(botContent, logStructure) {
         return lineCount;
     }
 
-    // Process all top-level nodes
     if (Array.isArray(botContent.nodes)) {
         for (let node of botContent.nodes) {
             processNode(node);

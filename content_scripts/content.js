@@ -1,5 +1,4 @@
 console.log("Content By AK loaded")
-console.log("Auth Token in content script:", localStorage.authToken);
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "getTabDetails") {
         const origin = window.location.origin;

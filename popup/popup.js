@@ -1,5 +1,47 @@
+// ========================================================================
+// DARK MODE TOGGLE - Initialize immediately
+// ========================================================================
+(function initDarkMode() {
+    const savedTheme = localStorage.getItem('botkit-theme') || 'light';
+    if (savedTheme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+        if (document.body) {
+            document.body.classList.add('dark-mode');
+        }
+    }
+})();
+
+// ========================================================================
+// MAIN APPLICATION
+// ========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Get DOM elements
+    // ====================================================================
+    // DARK MODE SETUP
+    // ====================================================================
+    const themeToggle = document.getElementById('themeToggle');
+    const themeLabel = document.getElementById('themeLabel');
+    const body = document.body;
+
+    // Apply saved theme
+    const savedTheme = localStorage.getItem('botkit-theme') || 'light';
+    if (savedTheme === 'dark') {
+        body.classList.add('dark-mode');
+        if (themeLabel) themeLabel.textContent = 'Dark';
+    }
+
+    // Toggle theme on click
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            if (themeLabel) themeLabel.textContent = isDark ? 'Dark' : 'Light';
+            localStorage.setItem('botkit-theme', isDark ? 'dark' : 'light');
+        });
+    }
+
+    // ====================================================================
+    // GET DOM ELEMENTS
+    // ====================================================================
     const elements = {
         lineCount: document.getElementById('lineCount'),
         logInput: document.getElementById('logInput'),
@@ -22,7 +64,9 @@ document.addEventListener('DOMContentLoaded', () => {
         copyBotActionContent: document.getElementById('CopyBotAction')
     };
 
-    // Tab switching
+    // ====================================================================
+    // TAB SWITCHING
+    // ====================================================================
     function switchTab(tabName) {
         if (tabName === 'LogAction') {
             elements.logActionContent.classList.add('active');
@@ -40,7 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.logActionTab.addEventListener('click', () => switchTab('LogAction'));
     elements.copyBotActionTab.addEventListener('click', () => switchTab('CopyBotAction'));
 
-    // Loader
+    // ====================================================================
+    // LOADER
+    // ====================================================================
     function showLoader() {
         elements.loader.style.display = 'block';
     }
@@ -49,38 +95,33 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.loader.style.display = 'none';
     }
 
-    // Status messages
+    // ====================================================================
+    // STATUS MESSAGES
+    // ====================================================================
     function showStatus(message, type = 'info') {
         elements.statusMessage.textContent = message;
         elements.statusMessage.className = 'show';
 
-        elements.statusMessage.style.background = {
-            'info': '#dbeafe',
-            'success': '#ecfdf5',
-            'warning': '#fffbeb',
-            'error': '#fef2f2'
-        }[type];
+        const styles = {
+            'info': { bg: '#dbeafe', color: '#1e40af', border: '#bfdbfe' },
+            'success': { bg: '#ecfdf5', color: '#065f46', border: '#d1fae5' },
+            'warning': { bg: '#fffbeb', color: '#92400e', border: '#fef3c7' },
+            'error': { bg: '#fef2f2', color: '#991b1b', border: '#fecaca' }
+        };
 
-        elements.statusMessage.style.color = {
-            'info': '#1e40af',
-            'success': '#065f46',
-            'warning': '#92400e',
-            'error': '#991b1b'
-        }[type];
-
-        elements.statusMessage.style.border = {
-            'info': '1px solid #bfdbfe',
-            'success': '1px solid #d1fae5',
-            'warning': '1px solid #fef3c7',
-            'error': '1px solid #fecaca'
-        }[type];
+        const style = styles[type] || styles.info;
+        elements.statusMessage.style.background = style.bg;
+        elements.statusMessage.style.color = style.color;
+        elements.statusMessage.style.border = `1px solid ${style.border}`;
     }
 
     function hideStatus() {
         elements.statusMessage.classList.remove('show');
     }
 
-    // Popup status
+    // ====================================================================
+    // POPUP STATUS
+    // ====================================================================
     function showPageStatus(message, type = 'info') {
         elements.popupMessage.textContent = message;
         elements.pageStatus.className = 'info-box';
@@ -94,7 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Validation feedback
+    // ====================================================================
+    // VALIDATION FEEDBACK
+    // ====================================================================
     function showValidation(message, type = 'valid', example = null) {
         let text = message;
         if (example) {
@@ -102,13 +145,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         elements.validationFeedback.textContent = text;
         elements.validationFeedback.className = `validation-message show ${type}`;
+
+        // Auto-hide valid messages after 3 seconds
+        if (type === 'valid') {
+            setTimeout(() => {
+                elements.validationFeedback.classList.remove('show');
+            }, 3000);
+        }
     }
 
     function hideValidation() {
         elements.validationFeedback.classList.remove('show');
     }
 
-    // Statistics report
+    // ====================================================================
+    // STATISTICS REPORT
+    // ====================================================================
     function showStats(stats) {
         const successRate = parseFloat(stats.successRate) || 0;
 
@@ -125,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         if (stats.placeholderUsed) {
-            html += `<div class="stats-item" style="margin-top: 8px;">Pattern: <strong>${stats.placeholderUsed}</strong></div>`;
+            html += `<div class="stats-item" style="margin-top: 6px;">Pattern: <strong>${stats.placeholderUsed}</strong></div>`;
         }
 
         if (stats.errors && stats.errors.length > 0) {
@@ -148,7 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
         elements.statsReport.classList.remove('show');
     }
 
-    // Check for auth token error
+    // ====================================================================
+    // AUTH TOKEN ERROR CHECK
+    // ====================================================================
     function checkAuthError() {
         if (elements.statusMessage.textContent.includes('auth token')) {
             elements.refreshButton.style.display = 'block';
@@ -160,7 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const observer = new MutationObserver(checkAuthError);
     observer.observe(elements.statusMessage, { childList: true, subtree: true });
 
-    // Get tab details
+    // ====================================================================
+    // GET TAB DETAILS
+    // ====================================================================
     function getTabDetails() {
         return new Promise((resolve) => {
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -179,14 +235,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Check if A360 bot page
+    // ====================================================================
+    // CHECK IF A360 BOT PAGE
+    // ====================================================================
     function isA360BotPage(url) {
         if (!url) return false;
         return /#\/bots\/repository\/private\/.*\/\d+\/edit$/.test(url);
     }
 
-    // Validate placeholder
+    // ====================================================================
+    // VALIDATE PLACEHOLDER
+    // ====================================================================
     function validatePlaceholder(placeholder) {
+        // Empty is valid (auto-detect)
         if (!placeholder || !placeholder.trim()) {
             return {
                 valid: true,
@@ -196,11 +257,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const trimmed = placeholder.trim();
-        const literalKeywords = ['line number', 'line_number', 'line-number', 'linenumber', 'linenum'];
-        const hasLiteral = literalKeywords.some(k => trimmed.toLowerCase().includes(k.toLowerCase()));
+
+        // Check minimum length
+        if (trimmed.length < 2) {
+            return {
+                valid: false,
+                message: '✗ Too short (minimum 2 characters)',
+                type: 'invalid'
+            };
+        }
+
+        // Check for literal placeholders
+        const literalKeywords = [
+            'line number', 'line_number', 'line-number', 'linenumber', 'linenum',
+            'LINE_NUMBER', 'LINE-NUMBER', 'LINENUMBER', 'LINENUM'
+        ];
+
+        const hasLiteral = literalKeywords.some(k =>
+            trimmed.toLowerCase().includes(k.toLowerCase())
+        );
 
         if (hasLiteral) {
-            const example = trimmed.replace(/line[_-]?number/gi, '42').replace(/linenum/gi, '42');
+            const example = trimmed
+                .replace(/line[_-]?number/gi, '42')
+                .replace(/linenum/gi, '42');
             return {
                 valid: true,
                 message: '✓ Valid literal placeholder',
@@ -209,6 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
+        // Check if it has numbers (pattern format)
         if (/\d+/.test(trimmed)) {
             const example = trimmed.replace(/\d+/g, '42');
             return {
@@ -219,22 +300,17 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         }
 
-        if (trimmed.length < 2) {
-            return {
-                valid: false,
-                message: '✗ Too short (min 2 characters)',
-                type: 'invalid'
-            };
-        }
-
+        // Custom placeholder warning
         return {
             valid: true,
-            message: '⚠ Custom placeholder - verify it exists',
+            message: '⚠ Custom placeholder - verify it exists in logs',
             type: 'warning'
         };
     }
 
-    // Fetch line count
+    // ====================================================================
+    // FETCH LINE COUNT
+    // ====================================================================
     async function fetchLineCount() {
         showLoader();
         hideStats();
@@ -285,7 +361,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Handle page load
+    // ====================================================================
+    // HANDLE PAGE LOAD
+    // ====================================================================
     async function handlePageLoad() {
         try {
             const tabDetails = await getTabDetails();
@@ -306,34 +384,52 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Validate button
+    // ====================================================================
+    // VALIDATE BUTTON - Immediate response
+    // ====================================================================
     elements.validateButton.addEventListener('click', () => {
-        const validation = validatePlaceholder(elements.logInput.value);
+        const placeholder = elements.logInput.value;
+        const validation = validatePlaceholder(placeholder);
+
+        // Always show validation result
         showValidation(validation.message, validation.type, validation.example);
     });
 
-    // Input validation (debounced)
+    // ====================================================================
+    // INPUT VALIDATION - Debounced auto-validation
+    // ====================================================================
     let validationTimeout;
     elements.logInput.addEventListener('input', () => {
         clearTimeout(validationTimeout);
+        hideValidation(); // Clear previous validation
+
         validationTimeout = setTimeout(() => {
-            const validation = validatePlaceholder(elements.logInput.value);
-            showValidation(validation.message, validation.type, validation.example);
-        }, 500);
+            const placeholder = elements.logInput.value;
+            const validation = validatePlaceholder(placeholder);
+
+            // Only show if there's an issue or if it's empty (to confirm auto-detect)
+            if (!validation.valid || !placeholder.trim()) {
+                showValidation(validation.message, validation.type, validation.example);
+            }
+        }, 800);
     });
 
-    // Update button
+    // ====================================================================
+    // UPDATE BUTTON
+    // ====================================================================
     elements.updateButton.addEventListener('click', async () => {
         const placeholder = elements.logInput.value.trim();
         const validation = validatePlaceholder(placeholder);
 
         if (!validation.valid) {
             showStatus(validation.message, 'error');
+            showValidation(validation.message, 'invalid');
             return;
         }
 
         showLoader();
         hideStats();
+        hideValidation();
 
         try {
             const response = await getTabDetails();
@@ -362,16 +458,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }, (updateResponse) => {
                 hideLoader();
 
-                if (updateResponse.success) {
-                    showStatus('✓ Bot updated successfully!', 'success');
+                if (updateResponse && updateResponse.success) {
+                    showStatus('✓ Bot updated! Refreshing page...', 'success');
 
                     if (updateResponse.stats) {
                         showStats(updateResponse.stats);
                     }
 
-                    setTimeout(fetchLineCount, 1000);
+                    // Auto-refresh the A360 page after 1.5 seconds
+                    setTimeout(() => {
+                        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                            if (tabs && tabs[0]) {
+                                chrome.tabs.reload(tabs[0].id);
+                            }
+                        });
+                    }, 1500);
                 } else {
-                    showStatus('✗ Update failed: ' + (updateResponse.error || 'Unknown error'), 'error');
+                    showStatus('✗ Update failed: ' + (updateResponse?.error || 'Unknown error'), 'error');
                 }
             });
         } catch (error) {
@@ -380,7 +483,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Copy button
+    // ====================================================================
+    // COPY BUTTON
+    // ====================================================================
     elements.copyButton.addEventListener('click', async () => {
         showLoader();
 
@@ -403,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, (botResponse) => {
                 hideLoader();
 
-                if (botResponse.success) {
+                if (botResponse && botResponse.success) {
                     navigator.clipboard.writeText(JSON.stringify(botResponse.botContent, null, 2))
                         .then(() => {
                             showStatus('✓ Copied to clipboard!', 'success');
@@ -422,7 +527,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Patch button
+    // ====================================================================
+    // PATCH BUTTON
+    // ====================================================================
     elements.patchButton.addEventListener('click', async () => {
         const content = elements.contentInput.value.trim();
 
@@ -464,11 +571,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }, (patchResponse) => {
                 hideLoader();
 
-                if (patchResponse.success) {
-                    showStatus('✓ Bot patched! Refresh the page.', 'success');
-                    elements.refreshButton.style.display = 'block';
+                if (patchResponse && patchResponse.success) {
+                    showStatus('✓ Bot patched! Refreshing page...', 'success');
+
+                    // Auto-refresh the A360 page after 1.5 seconds
+                    setTimeout(() => {
+                        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                            if (tabs && tabs[0]) {
+                                chrome.tabs.reload(tabs[0].id);
+                            }
+                        });
+                    }, 1500);
                 } else {
-                    showStatus('✗ Patch failed: ' + (patchResponse.error || 'Unknown'), 'error');
+                    showStatus('✗ Patch failed: ' + (patchResponse?.error || 'Unknown'), 'error');
                 }
             });
         } catch (error) {
@@ -477,7 +592,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Refresh button
+    // ====================================================================
+    // REFRESH BUTTON
+    // ====================================================================
     elements.refreshButton.addEventListener('click', () => {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (tabs && tabs[0]) {
@@ -486,6 +603,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Initialize
+    // ====================================================================
+    // INITIALIZE
+    // ====================================================================
     handlePageLoad();
 });
