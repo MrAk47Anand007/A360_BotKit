@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "A360 BotKit",
   "version": "2.0",
-  "description": "Professional tweaker for Automation Anywhere A360 bots. Add line numbers, manage bot content, and enhance your bot development workflow.",
+  "description": "Professional tweaker for Automation Anywhere A360 bots.",
   "permissions": [
     "activeTab"
   ],
