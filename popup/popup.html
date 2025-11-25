@@ -1,403 +1,491 @@
-<!-- Version I -->
-<!-- -------------------------------------------------------------------------------- -->
-<!--<!DOCTYPE html>-->
-<!--<html>-->
-<!--<head>-->
-<!--    <title>Bot Logging Enhancer</title>-->
-<!--    <link rel="stylesheet" href="popup.css">-->
-<!--    <style>-->
-<!--        body {-->
-<!--            font-family: Arial, sans-serif;-->
-<!--            width: 300px;-->
-<!--            padding: 20px;-->
-<!--            box-sizing: border-box;-->
-<!--        }-->
-
-<!--        .loader {-->
-<!--            border: 16px solid #f3f3f3; /* Light grey */-->
-<!--            border-top: 16px solid #3498db; /* Blue */-->
-<!--            border-radius: 50%;-->
-<!--            width: 60px;-->
-<!--            height: 60px;-->
-<!--            animation: spin 1s linear infinite;-->
-<!--            display: none; /* Hidden by default */-->
-<!--            position: fixed; /* Positioned above other elements */-->
-<!--            top: 50%;-->
-<!--            left: 50%;-->
-<!--            transform: translate(-50%, -50%);-->
-<!--            z-index: 9999; /* High z-index to appear above other elements */-->
-<!--        }-->
-
-<!--        @keyframes spin {-->
-<!--            0% { transform: rotate(0deg); }-->
-<!--            100% { transform: rotate(360deg); }-->
-<!--        }-->
-
-<!--        #totalLines h2 {-->
-<!--            font-size: 18px;-->
-<!--            margin-bottom: 20px;-->
-<!--        }-->
-
-<!--        #logStructure label {-->
-<!--            font-weight: bold;-->
-<!--            display: block;-->
-<!--            margin-bottom: 5px;-->
-<!--        }-->
-
-<!--        #logInput {-->
-<!--            width: 100%;-->
-<!--            height: 80px;-->
-<!--            padding: 10px;-->
-<!--            margin-bottom: 10px;-->
-<!--            border: 1px solid #ccc;-->
-<!--            border-radius: 4px;-->
-<!--            box-sizing: border-box;-->
-<!--        }-->
-
-<!--        #logStructure button,-->
-<!--        #copyButton button,-->
-<!--        #patchContent button,-->
-<!--        #updateSection button {-->
-<!--            background-color: #3498db;-->
-<!--            color: white;-->
-<!--            border: none;-->
-<!--            padding: 10px 15px;-->
-<!--            text-align: center;-->
-<!--            text-decoration: none;-->
-<!--            display: inline-block;-->
-<!--            font-size: 16px;-->
-<!--            margin: 5px 0;-->
-<!--            cursor: pointer;-->
-<!--            border-radius: 4px;-->
-<!--            transition: background-color 0.3s ease;-->
-<!--        }-->
-
-<!--        #logStructure button:hover,-->
-<!--        #updateSection button:hover {-->
-<!--            background-color: #2980b9;-->
-<!--        }-->
-
-<!--        #statusMessage {-->
-<!--            margin-top: 15px;-->
-<!--            padding: 10px;-->
-<!--            border: 1px solid #ccc;-->
-<!--            border-radius: 4px;-->
-<!--            color: #333;-->
-<!--            background-color: #f9f9f9;-->
-<!--            font-size: 14px;-->
-<!--            text-align: center;-->
-<!--        }-->
-
-<!--        #popupMessage {-->
-<!--            margin-top: 20px;-->
-<!--            padding: 10px;-->
-<!--            border: 1px solid #ccc;-->
-<!--            border-radius: 4px;-->
-<!--            background-color: #f9f9f9;-->
-<!--            font-size: 14px;-->
-<!--            text-align: center;-->
-<!--        }-->
-<!--        .tab {-->
-<!--            overflow: hidden;-->
-<!--            border: 1px solid #ccc;-->
-<!--            background-color: #f1f1f1;-->
-<!--        }-->
-
-<!--        .tab button {-->
-<!--            background-color: inherit;-->
-<!--            float: left;-->
-<!--            border: none;-->
-<!--            outline: none;-->
-<!--            cursor: pointer;-->
-<!--            padding: 14px 16px;-->
-<!--            transition: 0.3s;-->
-<!--            font-size: 14px;-->
-<!--        }-->
-
-<!--        .tab button:hover {-->
-<!--            background-color: #ddd;-->
-<!--        }-->
-
-<!--        .tab button.active {-->
-<!--            background-color: #ccc;-->
-<!--        }-->
-
-<!--        .tabcontent {-->
-<!--            display: none;-->
-<!--            padding: 6px 12px;-->
-<!--            border: 1px solid #ccc;-->
-<!--            border-top: none;-->
-<!--        }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--<div class="loader" id="loader"></div>-->
-
-<!--<div class="tab">-->
-<!--    <button class="tablinks" id="logActionTab">Log Action</button>-->
-<!--    <button class="tablinks" id="copyBotActionTab">Copy Bot Action</button>-->
-<!--</div>-->
-
-<!--<div id="LogAction" class="tabcontent">-->
-<!--    <div id="totalLines">-->
-<!--        <h2>Total Lines: <span id="lineCount">0</span></h2>-->
-<!--    </div>-->
-<!--    <div id="logStructure">-->
-<!--        <label for="logInput">Log Line Number Placeholder:</label>-->
-<!--        <textarea id="logInput" placeholder="Add your line number placeholder in log to file action"></textarea>-->
-<!--    </div>-->
-<!--    <div id="updateSection">-->
-<!--        <button id="updateButton">Update Bot</button>-->
-<!--    </div>-->
-<!--</div>-->
-
-<!--<div id="CopyBotAction" class="tabcontent">-->
-<!--    <div id="copyStructure">-->
-<!--        <label for="contentInput">Paste Copied Content Here:</label>-->
-<!--        <textarea id="contentInput" placeholder="Add Copied Content Here"></textarea>-->
-<!--        <button id="copyButton">Copy</button>-->
-<!--        <button id="patchContent">Patch Content</button>-->
-<!--    </div>-->
-<!--</div>-->
-
-<!--<div id="statusMessage"></div>-->
-<!--<div id="popupMessage"></div>-->
-
-<!--<footer id="footer">A.K</footer>-->
-
-<!--<script src="popup.js"></script>-->
-<!--</body>-->
-<!--</html>-->
-<!--&lt;!&ndash;    </style>&ndash;&gt;-->
-<!--&lt;!&ndash;</head>&ndash;&gt;-->
-<!--&lt;!&ndash;<body>&ndash;&gt;-->
-<!--&lt;!&ndash;<div class="loader" id="loader"></div>&ndash;&gt;-->
-<!--&lt;!&ndash;<div id="totalLines">&ndash;&gt;-->
-<!--&lt;!&ndash;    <h2>Total Lines: <span id="lineCount">0</span></h2>&ndash;&gt;-->
-<!--&lt;!&ndash;</div>&ndash;&gt;-->
-
-<!--&lt;!&ndash;<div id="logStructure">&ndash;&gt;-->
-<!--&lt;!&ndash;    <label for="logInput">Log Line Number Placeholder:</label>&ndash;&gt;-->
-<!--&lt;!&ndash;    <textarea id="logInput" placeholder="Add your line number placeholder in log to file action"></textarea>&ndash;&gt;-->
-<!--&lt;!&ndash;    <label for="contentInput">Paste Copied Content Here.</label>&ndash;&gt;-->
-<!--&lt;!&ndash;    <textarea id="contentInput" placeholder="Add Copied Content Here"></textarea>&ndash;&gt;-->
-<!--&lt;!&ndash;    <button id="copyButton">Copy</button>&ndash;&gt;-->
-<!--&lt;!&ndash;    <button id="patchContent">Patch Content</button>&ndash;&gt;-->
-<!--&lt;!&ndash;</div>&ndash;&gt;-->
-
-<!--&lt;!&ndash;<div id="updateSection">&ndash;&gt;-->
-<!--&lt;!&ndash;    <button id="updateButton">Update Bot</button>&ndash;&gt;-->
-<!--&lt;!&ndash;</div>&ndash;&gt;-->
-
-<!--&lt;!&ndash;<div id="statusMessage"></div>&ndash;&gt;-->
-<!--&lt;!&ndash;<div id="popupMessage"></div> &lt;!&ndash; Added this element for popup messages &ndash;&gt;&ndash;&gt;-->
-
-<!--&lt;!&ndash;<footer id="footer">A.K</footer>&ndash;&gt;-->
-
-<!--&lt;!&ndash;<script src="popup.js"></script>&ndash;&gt;-->
-<!--&lt;!&ndash;</body>&ndash;&gt;-->
-<!--&lt;!&ndash;</html>&ndash;&gt;-->
-
-<!-- Version 2 -->
-<!-- ------------------------------------------------------------------------------------------------ -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bot Logging Enhancer</title>
-    <link rel="stylesheet" href="popup.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            width: 300px;
-            padding: 20px;
+        * {
             box-sizing: border-box;
-            background: linear-gradient(135deg, #ece9e6, #ffffff);
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            width: 380px;
+            background: #ffffff;
+            color: #333333;
+        }
+
+        .header {
+            background: #f8f9fa;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .header h1 {
+            font-size: 16px;
+            font-weight: 600;
             color: #2c3e50;
-            border-radius: 12px; /* Rounded corners */
-            overflow: hidden; /* To prevent content overflow */
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .container {
+            padding: 20px;
         }
 
         .loader {
-            border: 16px solid #f3f3f3; /* Light grey */
-            border-top: 16px solid #3498db; /* Blue */
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
+            width: 36px;
+            height: 36px;
             animation: spin 1s linear infinite;
-            display: none; /* Hidden by default */
-            position: fixed; /* Positioned above other elements */
+            display: none;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 9999; /* High z-index to appear above other elements */
+            z-index: 9999;
+            background: white;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
-        #totalLines h2 {
-            font-size: 20px;
+        .tabs {
+            display: flex;
+            gap: 8px;
             margin-bottom: 20px;
-            color: #2980b9;
+            border-bottom: 1px solid #e9ecef;
         }
 
-        #logStructure label {
-            font-weight: bold;
+        .tab-button {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #6c757d;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-button:hover {
+            color: #495057;
+            background: #f8f9fa;
+        }
+
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
             display: block;
-            margin-bottom: 5px;
-            color: #34495e;
         }
 
-        #logInput, #contentInput {
-            width: 100%;
-            height: 80px;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
+        .info-box {
+            background: #f8f9fa;
+            border-left: 3px solid #3b82f6;
+            padding: 12px;
+            margin-bottom: 16px;
             border-radius: 4px;
-            box-sizing: border-box;
-            background-color: #ecf0f1;
+            font-size: 13px;
+            color: #495057;
+        }
+
+        .info-box.success {
+            background: #ecfdf5;
+            border-left-color: #10b981;
+            color: #065f46;
+        }
+
+        .info-box.warning {
+            background: #fffbeb;
+            border-left-color: #f59e0b;
+            color: #92400e;
+        }
+
+        .info-box.error {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .stat-value {
+            font-size: 15px;
+            font-weight: 600;
             color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 6px;
+        }
+
+        .label-help {
+            font-size: 11px;
+            font-weight: 400;
+            color: #6c757d;
+            margin-left: 4px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 70px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            resize: vertical;
+            transition: border-color 0.2s;
+            background: #ffffff;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        textarea::placeholder {
+            color: #adb5bd;
+        }
+
+        .examples-box {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+
+        .examples-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .example-item {
+            font-size: 12px;
+            color: #495057;
+            padding: 2px 0;
+            font-family: 'Courier New', monospace;
         }
 
         button {
-            background-color: #3498db;
+            width: 100%;
+            background: #3b82f6;
             color: white;
             border: none;
-            padding: 10px 15px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 5px 0;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
             cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
+            transition: background 0.2s;
+            margin-top: 8px;
         }
 
         button:hover {
-            background-color: #2980b9;
+            background: #2563eb;
         }
 
-        #statusMessage, #popupMessage {
-            margin-top: 15px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-            font-size: 14px;
-            text-align: center;
-            color: #2c3e50;
+        button:active {
+            background: #1d4ed8;
         }
 
-        .tab {
-            overflow: hidden;
-            border: 1px solid #ccc;
-            background-color: #f1f1f1;
+        button:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        button.secondary:hover {
+            background: #5a6268;
+        }
+
+        button.danger {
+            background: #ef4444;
+        }
+
+        button.danger:hover {
+            background: #dc2626;
+        }
+
+        .validation-message {
+            margin-top: 8px;
+            padding: 8px 10px;
             border-radius: 4px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .validation-message.show {
+            display: block;
+        }
+
+        .validation-message.valid {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #d1fae5;
+        }
+
+        .validation-message.invalid {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .validation-message.warning {
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fef3c7;
+        }
+
+        .stats-report {
+            display: none;
+            margin-top: 16px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .stats-report.show {
+            display: block;
+        }
+
+        .stats-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
             margin-bottom: 10px;
         }
 
-        .tab button {
-            background-color: inherit;
-            float: left;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            padding: 14px 16px;
-            transition: 0.3s;
-            font-size: 14px;
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3b82f6;
+            transition: width 0.3s;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .stats-item {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .stats-item strong {
             color: #2c3e50;
-            border-radius: 4px 4px 0 0; /* Rounded top corners for tabs */
         }
 
-        .tab button:hover {
-            background-color: #ddd;
+        .error-list {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e9ecef;
         }
 
-        .tab button.active {
-            background-color: #ccc;
+        .error-item {
+            font-size: 11px;
+            color: #6c757d;
+            padding: 3px 0;
         }
 
-        .tabcontent {
-            display: none;
+        #statusMessage {
+            margin-top: 12px;
             padding: 10px;
-            border: 1px solid #ccc;
-            border-top: none;
-            background-color: #ffffff;
-            border-radius: 0 0 4px 4px; /* Rounded bottom corners */
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: center;
+            display: none;
+        }
+
+        #statusMessage.show {
+            display: block;
+        }
+
+        #refreshButton {
+            display: none;
+            margin-top: 8px;
+        }
+
+        .tip-box {
+            background: #fffbeb;
+            border-left: 3px solid #f59e0b;
+            padding: 10px;
+            margin-top: 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #92400e;
         }
 
         footer {
             text-align: center;
-            font-size: 12px;
-            margin-top: 20px;
-            color: #7f8c8d;
-        }
-        #refreshButton {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            text-align: center;
-            text-decoration: none;
-            display: none; /* Hidden by default */
-            font-size: 16px;
-            margin: 5px 0;
-            cursor: pointer;
-            border-radius: 4px;
-            transition: background-color 0.3s ease;
+            padding: 12px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            font-size: 11px;
+            color: #6c757d;
         }
 
-        #refreshButton:hover {
-            background-color: #c0392b;
-        }
+        /* Simplified spacing */
+        .mb-8 { margin-bottom: 8px; }
+        .mb-12 { margin-bottom: 12px; }
+        .mb-16 { margin-bottom: 16px; }
+        .mt-8 { margin-top: 8px; }
+        .mt-12 { margin-top: 12px; }
     </style>
 </head>
 <body>
+<div class="header">
+    <h1>Bot Logging Enhancer</h1>
+    <p>Add line numbers to your A360 bot logs</p>
+</div>
+
 <div class="loader" id="loader"></div>
 
-<!-- Button tab on top of extension - Log Action and Copy Bot Action buttons -->
-<div class="tab">
-    <button class="tablinks active" id="logActionTab">Log Action</button>
-    <button class="tablinks" id="copyBotActionTab">Copy Bot Action</button>
+<div class="container">
+    <div class="tabs">
+        <button class="tab-button active" id="logActionTab">Update Bot</button>
+        <button class="tab-button" id="copyBotActionTab">Copy & Patch</button>
+    </div>
+
+    <!-- Tab 1: Update Bot -->
+    <div id="LogAction" class="tab-content active">
+        <div class="info-box" id="pageStatus">
+            <span id="popupMessage">Checking...</span>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-row">
+                <span class="stat-label">Total Lines</span>
+                <span class="stat-value" id="lineCount">0</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>
+                Placeholder Pattern
+                <span class="label-help">(leave empty for auto-detect)</span>
+            </label>
+            <textarea
+                    id="logInput"
+                    placeholder="Examples:&#10;|line number|&#10;| 0 |&#10;[empty for auto-detect]"
+            ></textarea>
+            <div class="validation-message" id="validationFeedback"></div>
+        </div>
+
+        <div class="examples-box">
+            <div class="examples-title">Supported Patterns</div>
+            <div class="example-item">• Literal: |line number| → |42|</div>
+            <div class="example-item">• Pattern: | 0 | → | 42 |</div>
+            <div class="example-item">• Auto: [5], #10#, -15-</div>
+        </div>
+
+        <button id="validateButton" class="secondary">Validate</button>
+        <button id="updateButton">Update Bot</button>
+
+        <div class="stats-report" id="statsReport">
+            <div class="stats-title">Update Report</div>
+            <div id="statsContent"></div>
+        </div>
+
+        <div class="tip-box">
+            <strong>Tip:</strong> Leave the field empty to automatically detect existing patterns
+        </div>
+    </div>
+
+    <!-- Tab 2: Copy & Patch -->
+    <div id="CopyBotAction" class="tab-content">
+        <div class="info-box warning">
+            <strong>Warning:</strong> Always backup your bot before patching
+        </div>
+
+        <div class="form-group">
+            <label>Bot Content (JSON)</label>
+            <textarea
+                    id="contentInput"
+                    placeholder="Paste your bot JSON content here..."
+            ></textarea>
+        </div>
+
+        <button id="copyButton" class="secondary">Copy Bot Content</button>
+        <button id="patchContent">Patch Bot</button>
+
+        <div class="tip-box">
+            <strong>Note:</strong> Page refresh required after successful patch
+        </div>
+    </div>
+
+    <div id="statusMessage"></div>
+    <button id="refreshButton" class="danger">Refresh Page</button>
 </div>
 
-<!-- Tab 1 - Log Action -->
-<!-- Main Area - Content, placeholder input -->
-<div id="LogAction" class="tabcontent" style="display: block;">
-    <div id="totalLines">
-        <h2>Total Lines: <span id="lineCount">0</span></h2> <!-- Show total lines number in bot -->
-    </div>
-    <div id="logStructure">
-        <label for="logInput">Log Line Number Placeholder:</label> <!-- Log line number placeholder label -->
-        <textarea id="logInput" placeholder="Add your line number placeholder in log to file action"></textarea> <!-- Text area input to enter log line number placeholder -->
-    </div>
-    <div id="updateSection">
-        <button id="updateButton">Update Bot</button> <!-- update bot button to update bot based on new line number -->
-    </div>
-</div>
+<footer>
+    Version 2.0 | Made by A.K
+</footer>
 
-<!-- Copy bot tab HTML - which contains input field and button to perform copy and patch content actions in Copy bot Tab -->
-<!-- Tab 2 - Copy Bot Action -->
-<div id="CopyBotAction" class="tabcontent">
-    <div id="copyStructure">
-        <label for="contentInput">Paste Copied Content Here:</label> <!-- Tab 2 - Paste copied content label -->
-        <textarea id="contentInput" placeholder="Add Copied Content Here"></textarea> <!-- Add copied content here text area input to enter copied content -->
-        <button id="copyButton">Copy</button>
-        <button id="patchContent">Patch Content</button>
-    </div>
-</div>
-
-<!-- Refresh button only visible when any error happens -->
-<div id="statusMessage"></div>
-<div id="popupMessage"></div>
-<button id="refreshButton">Refresh</button>
-<footer id="footer">A.K</footer>
 <script src="popup.js"></script>
 </body>
 </html>
