@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "Bot Logging Enhancer",
-  "version": "1.1",
-  "description": "A Chrome extension to enhance bot logging with line numbers.",
+  "name": "A360 BotKit",
+  "version": "2.0",
+  "description": "Professional tweaker for Automation Anywhere A360 bots. Add line numbers, manage bot content, and enhance your bot development workflow.",
   "permissions": [
     "activeTab"
   ],
   "background": {
     "service_worker": "background/background.js",
-    "type" : "module"
+    "type": "module"
   },
   "action": {
     "default_popup": "popup/popup.html",
@@ -28,5 +28,7 @@
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "author": "Anand S Kale",
+  "homepage_url": "https://github.com/MrAk47Anand007/A360_BotKit"
 }
