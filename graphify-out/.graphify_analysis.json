@@ -1,0 +1,224 @@
+{
+  "communities": {
+    "0": [
+      "a360_control_room_api",
+      "background_backgroundjs",
+      "background_calculateTotalLines",
+      "background_control_roomjs",
+      "background_getBotContent",
+      "background_putBotJSONContent",
+      "background_putBotJSONContentPaste",
+      "background_updateLogMessages",
+      "line_number_injection"
+    ],
+    "1": [
+      "popup_checkautherror",
+      "popup_hidestatus",
+      "popup_hidevalidation",
+      "popup_popup_js",
+      "popup_showstats",
+      "popup_showvalidation",
+      "popup_switchtab",
+      "popup_validateplaceholder"
+    ],
+    "2": [
+      "background_control_room_js",
+      "control_room_calculatetotallines",
+      "control_room_countlinesaccurately",
+      "control_room_getbotcontent",
+      "control_room_putbotjsoncontent",
+      "control_room_putbotjsoncontentpaste",
+      "control_room_updatelogmessages"
+    ],
+    "3": [
+      "copy_patch_workflow",
+      "dark_mode_preference",
+      "popup_popuphtml",
+      "popup_popupjs",
+      "readme_md",
+      "validation_and_stats"
+    ],
+    "4": [
+      "auth_token_scope_rationale",
+      "content_scripts_contentjs",
+      "local_processing_rationale",
+      "no_personal_data_collection",
+      "privacy_policy_html",
+      "token_used_only_for_control_room"
+    ],
+    "5": [
+      "popup_fetchlinecount",
+      "popup_hideloader",
+      "popup_hidestats",
+      "popup_showloader",
+      "popup_showstatus"
+    ],
+    "6": [
+      "a360_botkit_extension",
+      "icons_icon128_png",
+      "icons_icon16_png",
+      "icons_icon32_png",
+      "icons_icon48_png"
+    ],
+    "7": [
+      "popup_gettabdetails",
+      "popup_handlepageload",
+      "popup_isa360botpage",
+      "popup_showpagestatus"
+    ],
+    "8": [
+      "background_background_js"
+    ],
+    "9": [
+      "content_scripts_content_js"
+    ]
+  },
+  "cohesion": {
+    "0": 0.44,
+    "1": 0.25,
+    "2": 0.33,
+    "3": 0.47,
+    "4": 0.47,
+    "5": 0.4,
+    "6": 0.4,
+    "7": 0.5,
+    "8": 1.0,
+    "9": 1.0
+  },
+  "gods": [
+    {
+      "id": "popup_fetchlinecount",
+      "label": "fetchLineCount()",
+      "degree": 8
+    },
+    {
+      "id": "popup_popupjs",
+      "label": "Popup controller",
+      "degree": 8
+    },
+    {
+      "id": "privacy_policy_html",
+      "label": "A360 BotKit privacy policy",
+      "degree": 8
+    },
+    {
+      "id": "background_control_roomjs",
+      "label": "Control Room API helper module",
+      "degree": 7
+    },
+    {
+      "id": "a360_botkit_extension",
+      "label": "A360 BotKit Chrome extension",
+      "degree": 7
+    },
+    {
+      "id": "background_backgroundjs",
+      "label": "Background message router",
+      "degree": 6
+    },
+    {
+      "id": "readme_md",
+      "label": "A360 BotKit README",
+      "degree": 6
+    },
+    {
+      "id": "popup_handlepageload",
+      "label": "handlePageLoad()",
+      "degree": 5
+    },
+    {
+      "id": "background_putBotJSONContentPaste",
+      "label": "Patch bot content from pasted JSON",
+      "degree": 4
+    },
+    {
+      "id": "line_number_injection",
+      "label": "Dynamic line number injection",
+      "degree": 4
+    }
+  ],
+  "surprises": [
+    {
+      "source": "A360 BotKit app icon artwork (16px)",
+      "target": "A360 BotKit Chrome extension",
+      "source_files": [
+        "icons/icon16.png",
+        "README.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "conceptually_related_to",
+      "why": "inferred connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `A360 BotKit app icon artwork (16px)` unexpectedly reaches hub `A360 BotKit Chrome extension`"
+    },
+    {
+      "source": "A360 BotKit app icon artwork (32px)",
+      "target": "A360 BotKit Chrome extension",
+      "source_files": [
+        "icons/icon32.png",
+        "README.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "conceptually_related_to",
+      "why": "inferred connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `A360 BotKit app icon artwork (32px)` unexpectedly reaches hub `A360 BotKit Chrome extension`"
+    },
+    {
+      "source": "A360 BotKit app icon artwork (48px)",
+      "target": "A360 BotKit Chrome extension",
+      "source_files": [
+        "icons/icon48.png",
+        "README.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "conceptually_related_to",
+      "why": "inferred connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `A360 BotKit app icon artwork (48px)` unexpectedly reaches hub `A360 BotKit Chrome extension`"
+    },
+    {
+      "source": "A360 BotKit app icon artwork (128px)",
+      "target": "A360 BotKit Chrome extension",
+      "source_files": [
+        "icons/icon128.png",
+        "README.md"
+      ],
+      "confidence": "INFERRED",
+      "relation": "conceptually_related_to",
+      "why": "inferred connection - not explicitly stated in source; crosses file types (doc \u2194 image); connects across different repos/directories; peripheral node `A360 BotKit app icon artwork (128px)` unexpectedly reaches hub `A360 BotKit Chrome extension`"
+    },
+    {
+      "source": "Control Room API helper module",
+      "target": "Token used only for Control Room requests",
+      "source_files": [
+        "background/control_room.js",
+        "privacy-policy.html"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "crosses file types (code \u2194 doc); connects across different repos/directories; bridges separate communities"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `Popup controller` connect `User Workflow Surface` to `Control Room Sync`, `Token Privacy Model`, `Extension Branding`?",
+      "why": "High betweenness centrality (0.075) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `A360 BotKit Chrome extension` connect `Extension Branding` to `User Workflow Surface`, `Token Privacy Model`?",
+      "why": "High betweenness centrality (0.074) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `A360 BotKit privacy policy` connect `Token Privacy Model` to `User Workflow Surface`, `Extension Branding`?",
+      "why": "High betweenness centrality (0.063) - this node is a cross-community bridge."
+    },
+    {
+      "type": "verify_inferred",
+      "question": "Are the 4 inferred relationships involving `A360 BotKit Chrome extension` (e.g. with `A360 BotKit app icon artwork (16px)` and `A360 BotKit app icon artwork (32px)`) actually correct?",
+      "why": "`A360 BotKit Chrome extension` has 4 INFERRED edges - model-reasoned connections that need verification."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `Popup interface markup`, `A360 BotKit app icon artwork (16px)`, `A360 BotKit app icon artwork (32px)` to the rest of the system?",
+      "why": "5 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ]
+}

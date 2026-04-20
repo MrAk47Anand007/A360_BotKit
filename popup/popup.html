@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A360 BotKit</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            width: 380px;
+            height: 550px;
+            background: #ffffff;
+            color: #333333;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode {
+            background: #1a1a1a;
+            color: #e5e5e5;
+        }
+
+        .header {
+            background: #f8f9fa;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        body.dark-mode .header {
+            background: #2d2d2d;
+            border-bottom-color: #404040;
+        }
+
+        .header-content h1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .header-content h1 {
+            color: #e5e5e5;
+        }
+
+        .header-content p {
+            font-size: 12px;
+            color: #6c757d;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .header-content p {
+            color: #9ca3af;
+        }
+
+        .header-status {
+            margin-left: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            min-width: 120px;
+            gap: 4px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 88px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            border: 1px solid transparent;
+            text-transform: uppercase;
+        }
+
+        .status-badge.gray {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .status-badge.blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-badge.teal {
+            background: #ccfbf1;
+            color: #0f766e;
+        }
+
+        .status-badge.green {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-badge.yellow {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.red {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .status-caption {
+            font-size: 10px;
+            color: #6c757d;
+            text-align: right;
+            line-height: 1.3;
+        }
+
+        body.dark-mode .status-badge.gray {
+            background: #374151;
+            color: #e5e7eb;
+        }
+
+        body.dark-mode .status-badge.blue {
+            background: #1e3a8a;
+            color: #dbeafe;
+        }
+
+        body.dark-mode .status-badge.teal {
+            background: #134e4a;
+            color: #ccfbf1;
+        }
+
+        body.dark-mode .status-badge.green {
+            background: #14532d;
+            color: #dcfce7;
+        }
+
+        body.dark-mode .status-badge.yellow {
+            background: #78350f;
+            color: #fde68a;
+        }
+
+        body.dark-mode .status-badge.red {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        body.dark-mode .status-caption {
+            color: #9ca3af;
+        }
+
+        /* Dark Mode Toggle Switch */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-label {
+            font-size: 11px;
+            color: #6c757d;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .toggle-label {
+            color: #9ca3af;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: #cbd5e1;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-switch:hover {
+            background: #94a3b8;
+        }
+
+        body.dark-mode .toggle-switch {
+            background: #3b82f6;
+        }
+
+        body.dark-mode .toggle-switch:hover {
+            background: #2563eb;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        body.dark-mode .toggle-slider {
+            transform: translateX(20px);
+        }
+
+        .container {
+            padding: 16px 20px;
+            height: calc(550px - 92px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: background-color 0.3s;
+        }
+
+        /* Hide scrollbar but keep functionality */
+        .container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .container::-webkit-scrollbar-thumb {
+            background: #e9ecef;
+            border-radius: 3px;
+        }
+
+        body.dark-mode .container::-webkit-scrollbar-thumb {
+            background: #404040;
+        }
+
+        .container::-webkit-scrollbar-thumb:hover {
+            background: #dee2e6;
+        }
+
+        body.dark-mode .container::-webkit-scrollbar-thumb:hover {
+            background: #525252;
+        }
+
+        .loader {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            animation: spin 1s linear infinite;
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background: white;
+        }
+
+        body.dark-mode .loader {
+            background: #2d2d2d;
+            border-color: #404040;
+            border-top-color: #3b82f6;
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #e9ecef;
+            transition: border-color 0.3s;
+        }
+
+        body.dark-mode .tabs {
+            border-bottom-color: #404040;
+        }
+
+        .tab-button {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #6c757d;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        body.dark-mode .tab-button {
+            color: #9ca3af;
+        }
+
+        .tab-button:hover {
+            color: #495057;
+            background: #f8f9fa;
+        }
+
+        body.dark-mode .tab-button:hover {
+            color: #e5e5e5;
+            background: #2d2d2d;
+        }
+
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 3px solid #3b82f6;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #495057;
+            line-height: 1.4;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode .info-box {
+            background: #2d2d2d;
+            color: #d1d5db;
+        }
+
+        .info-box.success {
+            background: #ecfdf5;
+            border-left-color: #10b981;
+            color: #065f46;
+        }
+
+        body.dark-mode .info-box.success {
+            background: #064e3b;
+            color: #6ee7b7;
+        }
+
+        .info-box.warning {
+            background: #fffbeb;
+            border-left-color: #f59e0b;
+            color: #92400e;
+        }
+
+        body.dark-mode .info-box.warning {
+            background: #78350f;
+            color: #fbbf24;
+        }
+
+        .info-box.error {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+            color: #991b1b;
+        }
+
+        body.dark-mode .info-box.error {
+            background: #7f1d1d;
+            color: #fca5a5;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 14px;
+            transition: background-color 0.3s;
+        }
+
+        body.dark-mode .stat-card {
+            background: #2d2d2d;
+        }
+
+        .setting-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 14px;
+            transition: background-color 0.3s;
+        }
+
+        body.dark-mode .setting-card {
+            background: #2d2d2d;
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .setting-copy {
+            flex: 1;
+        }
+
+        .setting-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .setting-title {
+            color: #e5e5e5;
+        }
+
+        .setting-help {
+            margin-top: 4px;
+            font-size: 11px;
+            color: #6c757d;
+            line-height: 1.4;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .setting-help {
+            color: #9ca3af;
+        }
+
+        .setting-select {
+            width: 100%;
+            margin-top: 10px;
+            padding: 8px 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-size: 12px;
+            background: #ffffff;
+            color: #333333;
+            transition: all 0.2s;
+        }
+
+        body.dark-mode .setting-select {
+            background: #1a1a1a;
+            border-color: #404040;
+            color: #e5e5e5;
+        }
+
+        .setting-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .toggle-input {
+            width: 18px;
+            height: 18px;
+            accent-color: #3b82f6;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .setting-status {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #6c757d;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .setting-status {
+            color: #9ca3af;
+        }
+
+        .setting-checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #495057;
+        }
+
+        body.dark-mode .setting-checkbox-row {
+            color: #d1d5db;
+        }
+
+        .setting-checkbox-row input {
+            width: 16px;
+            height: 16px;
+            accent-color: #3b82f6;
+            flex-shrink: 0;
+        }
+
+        .mode-guide {
+            background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+            border: 1px solid #dbeafe;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        body.dark-mode .mode-guide {
+            background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+            border-color: #374151;
+        }
+
+        .mode-guide-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #1e3a8a;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode .mode-guide-title {
+            color: #bfdbfe;
+        }
+
+        .mode-guide-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .mode-guide-item {
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(191, 219, 254, 0.9);
+        }
+
+        body.dark-mode .mode-guide-item {
+            background: rgba(31, 41, 55, 0.92);
+            border-color: rgba(75, 85, 99, 0.95);
+        }
+
+        .mode-guide-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        body.dark-mode .mode-guide-label {
+            color: #f3f4f6;
+        }
+
+        .mode-guide-copy {
+            font-size: 11px;
+            color: #6b7280;
+            line-height: 1.45;
+        }
+
+        body.dark-mode .mode-guide-copy {
+            color: #9ca3af;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 0;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .stat-label {
+            color: #9ca3af;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .stat-value {
+            color: #e5e5e5;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 6px;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode label {
+            color: #d1d5db;
+        }
+
+        .label-help {
+            font-size: 11px;
+            font-weight: 400;
+            color: #6c757d;
+            margin-left: 4px;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .label-help {
+            color: #9ca3af;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 60px;
+            max-height: 80px;
+            padding: 8px 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            resize: vertical;
+            transition: all 0.2s;
+            background: #ffffff;
+            color: #333333;
+            line-height: 1.4;
+        }
+
+        body.dark-mode textarea {
+            background: #1a1a1a;
+            border-color: #404040;
+            color: #e5e5e5;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        textarea::placeholder {
+            color: #adb5bd;
+            font-size: 11px;
+        }
+
+        body.dark-mode textarea::placeholder {
+            color: #6b7280;
+        }
+
+        .examples-box {
+            background: #f8f9fa;
+            padding: 8px 10px;
+            border-radius: 4px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+            transition: background-color 0.3s;
+        }
+
+        body.dark-mode .examples-box {
+            background: #2d2d2d;
+        }
+
+        .examples-title {
+            font-size: 10px;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .examples-title {
+            color: #9ca3af;
+        }
+
+        .example-item {
+            font-size: 11px;
+            color: #495057;
+            padding: 2px 0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .example-item {
+            color: #d1d5db;
+        }
+
+        button {
+            width: 100%;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 9px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 6px;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        button:active {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        body.dark-mode button:disabled {
+            background: #404040;
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        button.secondary:hover {
+            background: #5a6268;
+        }
+
+        body.dark-mode button.secondary {
+            background: #525252;
+        }
+
+        body.dark-mode button.secondary:hover {
+            background: #404040;
+        }
+
+        button.danger {
+            background: #ef4444;
+        }
+
+        button.danger:hover {
+            background: #dc2626;
+        }
+
+        .validation-message {
+            margin-top: 6px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            display: none;
+            line-height: 1.4;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .validation-message.show {
+            display: block;
+        }
+
+        .validation-message.valid {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #d1fae5;
+        }
+
+        body.dark-mode .validation-message.valid {
+            background: #064e3b;
+            color: #6ee7b7;
+            border-color: #065f46;
+        }
+
+        .validation-message.invalid {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        body.dark-mode .validation-message.invalid {
+            background: #7f1d1d;
+            color: #fca5a5;
+            border-color: #991b1b;
+        }
+
+        .validation-message.warning {
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fef3c7;
+        }
+
+        body.dark-mode .validation-message.warning {
+            background: #78350f;
+            color: #fbbf24;
+            border-color: #92400e;
+        }
+
+        .stats-report {
+            display: none;
+            margin-top: 12px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        body.dark-mode .stats-report {
+            background: #2d2d2d;
+        }
+
+        .stats-report.show {
+            display: block;
+        }
+
+        .stats-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .stats-title {
+            color: #d1d5db;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 6px 0;
+            transition: background-color 0.3s;
+        }
+
+        body.dark-mode .progress-bar {
+            background: #404040;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3b82f6;
+            transition: width 0.3s;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .stats-item {
+            font-size: 11px;
+            color: #6c757d;
+            line-height: 1.4;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .stats-item {
+            color: #9ca3af;
+        }
+
+        .stats-item strong {
+            color: #2c3e50;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .stats-item strong {
+            color: #e5e5e5;
+        }
+
+        .error-list {
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid #e9ecef;
+            transition: border-color 0.3s;
+        }
+
+        body.dark-mode .error-list {
+            border-top-color: #404040;
+        }
+
+        .error-item {
+            font-size: 10px;
+            color: #6c757d;
+            padding: 2px 0;
+            line-height: 1.4;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .error-item {
+            color: #9ca3af;
+        }
+
+        #statusMessage {
+            margin-top: 10px;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            text-align: center;
+            display: none;
+            line-height: 1.4;
+        }
+
+        #statusMessage.show {
+            display: block;
+        }
+
+        #refreshButton {
+            display: none;
+            margin-top: 6px;
+        }
+
+        .tip-box {
+            background: #fffbeb;
+            border-left: 3px solid #f59e0b;
+            padding: 8px 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #92400e;
+            line-height: 1.4;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode .tip-box {
+            background: #78350f;
+            color: #fbbf24;
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            font-size: 10px;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+
+        body.dark-mode footer {
+            background: #2d2d2d;
+            border-top-color: #404040;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-content">
+        <h1>A360 BotKit</h1>
+        <p>Tweak your A360 bots</p>
+    </div>
+    <div class="header-status">
+        <span class="status-badge gray" id="saveStateBadge">Inactive</span>
+        <div class="status-caption" id="saveStateCaption">Open an A360 bot editor page</div>
+    </div>
+    <div class="theme-toggle">
+        <span class="toggle-label" id="themeLabel">Light</span>
+        <div class="toggle-switch" id="themeToggle">
+            <div class="toggle-slider"></div>
+        </div>
+    </div>
+</div>
+
+<div class="loader" id="loader"></div>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab-button active" id="logActionTab">Update Bot</button>
+        <button class="tab-button" id="copyBotActionTab">Copy & Patch</button>
+        <button class="tab-button" id="settingsTab">Settings</button>
+    </div>
+
+    <!-- Tab 1: Update Bot -->
+    <div id="LogAction" class="tab-content active">
+        <div class="info-box" id="pageStatus">
+            <span id="popupMessage">Checking...</span>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-row">
+                <span class="stat-label">Total Lines</span>
+                <span class="stat-value" id="lineCount">0</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>
+                Placeholder Pattern
+                <span class="label-help">(leave empty for auto-detect)</span>
+            </label>
+            <textarea
+                    id="logInput"
+                    placeholder="Examples:&#10;|line number|&#10;| 0 |&#10;[empty for auto-detect]"
+            ></textarea>
+            <div class="validation-message" id="validationFeedback"></div>
+        </div>
+
+        <div class="examples-box">
+            <div class="examples-title">Supported Patterns</div>
+            <div class="example-item">• |line number| → |42|</div>
+            <div class="example-item">• | 0 | → | 42 |</div>
+            <div class="example-item">• [5], #10#, -15-</div>
+        </div>
+
+        <button id="validateButton" class="secondary">Validate Pattern</button>
+        <button id="updateButton">Update Bot</button>
+
+        <div class="stats-report" id="statsReport">
+            <div class="stats-title">Update Report</div>
+            <div id="statsContent"></div>
+        </div>
+
+        <div class="tip-box">
+            <strong>Tip:</strong> Leave empty to auto-detect existing patterns
+        </div>
+    </div>
+
+    <!-- Tab 2: Copy & Patch -->
+    <div id="CopyBotAction" class="tab-content">
+        <div class="info-box warning">
+            <strong>Warning:</strong> Always backup your bot before patching
+        </div>
+
+        <div class="form-group">
+            <label>Bot Content (JSON)</label>
+            <textarea
+                    id="contentInput"
+                    placeholder="Paste your bot JSON content here..."
+            ></textarea>
+        </div>
+
+        <button id="copyButton" class="secondary">Copy Bot Content</button>
+        <button id="patchContent">Patch Bot</button>
+
+        <div class="tip-box">
+            <strong>Note:</strong> Page will auto-refresh after successful patch
+        </div>
+    </div>
+
+    <!-- Tab 3: Settings -->
+    <div id="SettingsAction" class="tab-content">
+        <div class="setting-card">
+            <div class="setting-row">
+                <div class="setting-copy">
+                    <div class="setting-title">Auto Save</div>
+                    <div class="setting-help">Choose when A360 saves and how visible that save feels.</div>
+                </div>
+                <input type="checkbox" id="autosaveToggle" class="toggle-input" />
+            </div>
+
+            <select id="autosaveDelay" class="setting-select">
+                <option value="3000">Save after 3 seconds</option>
+                <option value="5000">Save after 5 seconds</option>
+                <option value="10000">Save after 10 seconds</option>
+                <option value="15000">Save after 15 seconds</option>
+            </select>
+
+            <select id="autosaveMode" class="setting-select">
+                <option value="native">Native Mode (Recommended)</option>
+                <option value="silent">Silent Mode (Experimental)</option>
+            </select>
+
+            <label class="setting-checkbox-row">
+                <input type="checkbox" id="autosaveFallback" />
+                <span>Fallback to native Save if silent mode fails</span>
+            </label>
+
+            <div class="setting-status" id="autosaveStatus">Auto save is off</div>
+        </div>
+
+        <div class="mode-guide">
+            <div class="mode-guide-title">Mode Guide</div>
+            <div class="mode-guide-grid">
+                <div class="mode-guide-item">
+                    <div class="mode-guide-label">Native Mode</div>
+                    <div class="mode-guide-copy">Uses A360’s real Save button. Most reliable, but users may notice the normal save loader.</div>
+                </div>
+                <div class="mode-guide-item">
+                    <div class="mode-guide-label">Silent Mode</div>
+                    <div class="mode-guide-copy">Saves in the background for a smoother feel. Best for low interruption, but can be less stable after A360 changes.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="statusMessage"></div>
+    <button id="refreshButton" class="danger">Refresh Page</button>
+
+    <div style="height: 50px;"></div>
+</div>
+
+<footer>
+    Version 2.0 | Made by A.K
+</footer>
+
+<script src="popup.js"></script>
+</body>
+</html>

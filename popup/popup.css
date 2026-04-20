@@ -1,0 +1,53 @@
+body {
+    font-family: sans-serif; /* Choose a clear, easy-to-read font */
+    margin: 10px;            /* Add some padding around the content */
+    min-width: 350px;       /* Ensure a minimum width for the popup */
+}
+
+h2 {
+    margin-bottom: 5px;       /* Reduce space between heading and line count */
+}
+
+#lineCount {
+    font-weight: bold;        /* Highlight the line count */
+}
+
+#logStructure {
+    margin-top: 15px;        /* Space between sections */
+}
+
+textarea{
+    width: 100%;             /* Make the text area fill the width */
+    height: 80px;            /* Adjust height as needed */
+    padding: 5px;
+    resize: vertical;        /* Allow vertical resizing only */
+    font-family: monospace;  /* Use a monospace font for structure clarity */
+}
+
+button {
+    background-color: #007bff;  /* Blue button color */
+    color: white;              /* White text */
+    padding: 8px 15px;
+    border: none;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+footer{
+    margin-top: 10px;
+    flex-direction: column;
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+#updateSection {
+    margin-top: 15px;           /* Space between sections */
+}
+
+#statusMessage {
+    margin-top: 10px;
+    font-style: italic;
+    color: #333;                /* Grayish text for status */
+}

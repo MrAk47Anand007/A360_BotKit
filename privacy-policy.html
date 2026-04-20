@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - A360 BotKit</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --accent: #2563eb;
+            --soft: #eff6ff;
+            --soft-border: #bfdbfe;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.65;
+            padding: 24px;
+        }
+
+        .page {
+            max-width: 920px;
+            margin: 0 auto;
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 36px;
+            box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
+        }
+
+        h1, h2, h3 {
+            margin: 0 0 12px;
+            line-height: 1.25;
+        }
+
+        h1 {
+            font-size: 32px;
+        }
+
+        h2 {
+            margin-top: 32px;
+            font-size: 22px;
+        }
+
+        h3 {
+            margin-top: 20px;
+            font-size: 17px;
+        }
+
+        p, ul {
+            margin: 0 0 14px;
+        }
+
+        ul {
+            padding-left: 22px;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .eyebrow {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .updated {
+            color: var(--muted);
+            margin-bottom: 18px;
+        }
+
+        .summary {
+            background: var(--soft);
+            border: 1px solid var(--soft-border);
+            border-radius: 14px;
+            padding: 16px 18px;
+        }
+
+        .section {
+            padding-top: 8px;
+        }
+
+        .contact {
+            margin-top: 28px;
+            padding: 18px;
+            border-radius: 14px;
+            background: #f9fafb;
+            border: 1px solid var(--line);
+        }
+
+        .footer {
+            margin-top: 36px;
+            padding-top: 18px;
+            border-top: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 14px;
+            }
+
+            .page {
+                padding: 22px;
+                border-radius: 14px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="eyebrow">A360 BotKit</div>
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: April 20, 2026</p>
+
+    <div class="summary">
+        <p><strong>Short version:</strong> A360 BotKit is a Chrome extension for editing Automation Anywhere A360 bots inside Control Room. It uses your current browser session to read bot editor data and send bot updates back to your own A360 Control Room. It does not sell data, run analytics, or send your bot data to the developer.</p>
+    </div>
+
+    <div class="section">
+        <h2>1. Who this policy applies to</h2>
+        <p>This policy applies to the A360 BotKit Chrome extension developed by Anand S Kale.</p>
+    </div>
+
+    <div class="section">
+        <h2>2. What the extension is for</h2>
+        <p>A360 BotKit has a single purpose: improving Automation Anywhere A360 bot editing inside Control Room. It provides tools for line-number updates, copy and patch workflows, and autosave.</p>
+    </div>
+
+    <div class="section">
+        <h2>3. What data the extension handles</h2>
+        <p>The extension may access the following data when you use it on an A360 bot editor page:</p>
+        <ul>
+            <li>the current page URL and bot file ID</li>
+            <li>the A360 auth token already present in your browser session</li>
+            <li>bot JSON returned by your A360 Control Room</li>
+            <li>current unsaved editor data used for autosave</li>
+            <li>extension settings such as autosave preferences and theme preference</li>
+        </ul>
+        <p>The extension does not ask for your A360 password and does not operate its own login system.</p>
+    </div>
+
+    <div class="section">
+        <h2>4. How the extension uses that data</h2>
+        <p>The extension uses the data above only to provide its user-facing features:</p>
+        <ul>
+            <li>fetching the current bot content</li>
+            <li>updating log placeholders with line numbers</li>
+            <li>copying bot JSON to your clipboard</li>
+            <li>patching a bot from valid JSON you provide</li>
+            <li>running native or silent autosave inside the current editor</li>
+            <li>showing status information in the popup and on the A360 page</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>5. Where data is sent</h2>
+        <p>A360 BotKit sends bot content and save requests only to the same Automation Anywhere A360 Control Room that you are already signed in to.</p>
+        <p>The extension does <strong>not</strong> send your auth token, bot data, clipboard contents, or autosave payloads to the developer, analytics providers, ad networks, or unrelated third parties.</p>
+    </div>
+
+    <div class="section">
+        <h2>6. What the extension stores locally</h2>
+        <ul>
+            <li><strong>Theme preference:</strong> stored in extension local storage as <code>botkit-theme</code></li>
+            <li><strong>Autosave settings:</strong> stored in <code>chrome.storage.local</code> under the extension's storage area</li>
+        </ul>
+        <p>The extension does not intentionally persist your bot content or auth token in its own long-term storage.</p>
+    </div>
+
+    <div class="section">
+        <h2>7. Permissions and site access</h2>
+        <h3>activeTab</h3>
+        <p>Used so the popup can interact with the current tab when you run extension features.</p>
+
+        <h3>storage</h3>
+        <p>Used to save autosave settings locally in Chrome.</p>
+
+        <h3>HTTPS page access</h3>
+        <p>A360 Control Room can be hosted on many different customer domains. For that reason, the extension is packaged to work across HTTPS sites. In practice, its bot-editing behavior is limited by runtime checks to supported A360 bot editor pages.</p>
+    </div>
+
+    <div class="section">
+        <h2>8. Data sharing</h2>
+        <p>We do not sell user data. We do not use user data for advertising. We do not share user data with data brokers or analytics platforms.</p>
+        <p>The only expected transfer of data is between your browser and your own A360 Control Room when you use the extension's features.</p>
+    </div>
+
+    <div class="section">
+        <h2>9. Security</h2>
+        <p>The extension communicates with A360 over your existing HTTPS session. We recommend using the extension only on trusted devices and following your organization's A360 security practices.</p>
+    </div>
+
+    <div class="section">
+        <h2>10. Your choices</h2>
+        <ul>
+            <li>You can disable or uninstall the extension at any time.</li>
+            <li>You can turn autosave off from the Settings tab.</li>
+            <li>You can clear the extension's local settings from Chrome if needed.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>11. Changes to this policy</h2>
+        <p>This policy may be updated when the extension changes or when legal or platform requirements change. The latest version will be published at this page.</p>
+    </div>
+
+    <div class="section">
+        <h2>12. Contact</h2>
+        <div class="contact">
+            <p><strong>Developer:</strong> Anand S Kale</p>
+            <p><strong>Email:</strong> <a href="mailto:anandkalegak@gmail.com">anandkalegak@gmail.com</a></p>
+            <p><strong>Project:</strong> <a href="https://github.com/MrAk47Anand007/A360_BotKit" target="_blank" rel="noreferrer">GitHub Repository</a></p>
+            <p><strong>Support:</strong> <a href="https://github.com/MrAk47Anand007/A360_BotKit/issues" target="_blank" rel="noreferrer">GitHub Issues</a></p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>13. Independent product notice</h2>
+        <p>A360 BotKit is an independent tool and is not affiliated with or endorsed by Automation Anywhere.</p>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 Anand S Kale. A360 BotKit is released under the MIT License.</p>
+    </div>
+</div>
+</body>
+</html>
