@@ -5,9 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A360 BotKit</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap"
-        rel="stylesheet">
     <link rel="stylesheet" href="popup.css">
 </head>
 
@@ -42,6 +39,7 @@
                 <button class="tab-button" id="copyBotActionTab">Cpy-Pste</button>
                 <button class="tab-button" id="exportBotTab">Export</button>
                 <button class="tab-button" id="importActionTab">Import</button>
+                <button class="tab-button" id="versionUpdateTab">Version Update</button>
                 <button class="tab-button" id="settingsTab">Settings</button>
             </div>
         </div>
@@ -219,7 +217,50 @@
             </div>
         </div>
 
-        <!-- Tab 5: Settings -->
+        <div id="VersionUpdateAction" class="tab-content">
+            <div class="section-hero">
+                <div class="section-title">Update package versions</div>
+                <div class="section-description">Choose bots across this folder and its subfolders, then update one package.</div>
+            </div>
+            <div class="version-context" id="versionFolder">Open a Control Room folder to begin.</div>
+            <button id="versionScan" class="secondary">Scan Current Folder</button>
+            <div id="versionStatus" class="version-status" role="status" aria-live="polite"></div>
+
+            <section id="versionSelection" hidden>
+                <div class="version-section-heading"><h2>1. Select bots</h2><span id="versionBotCount"></span></div>
+                <input id="versionBotSearch" type="search" placeholder="Search bot names or paths" aria-label="Search bots">
+                <label class="version-select-all"><input id="versionSelectAll" type="checkbox"> Select all editable bots</label>
+                <div id="versionBotList" class="version-bot-list"></div>
+
+                <div class="version-section-heading"><h2>2. Choose package and version</h2></div>
+                <label for="versionPackage">Package used by selected bots</label>
+                <select id="versionPackage" disabled><option value="">Select bots first</option></select>
+                <div id="versionUsage" class="version-usage"></div>
+                <label for="versionTarget">Target version</label>
+                <select id="versionTarget" disabled><option value="">Select a package first</option></select>
+                <div id="versionRequirements" class="version-muted"></div>
+                <button id="versionPreviewButton" class="secondary" disabled>Preview Changes</button>
+
+                <section id="versionPreview" class="version-preview" hidden>
+                    <div class="version-section-heading"><h2>3. Review and update</h2></div>
+                    <div id="versionPreviewSummary"></div>
+                    <div id="versionPreviewList" class="version-bot-list"></div>
+                    <button id="versionApply" disabled>Update Package Versions</button>
+                    <p class="version-muted">Only the matching package version changes. Bots without this package stay as they are.</p>
+                </section>
+            </section>
+
+            <section id="versionJob" hidden>
+                <div class="version-section-heading"><h2>Update results</h2><span id="versionJobCount"></span></div>
+                <div id="versionJobSummary" class="version-status" role="status" aria-live="polite"></div>
+                <progress id="versionJobProgress" max="1" value="0" aria-label="Package update progress"></progress>
+                <div id="versionJobList" class="version-bot-list"></div>
+                <button id="versionDownloadReport" class="secondary" disabled>Download Results</button>
+                <p class="version-muted">You can close this popup while updates run. Reopen Version Update to view results.</p>
+            </section>
+        </div>
+
+        <!-- Settings -->
         <div id="SettingsAction" class="tab-content">
             <div class="section-hero">
                 <div class="section-title">Preferences</div>
@@ -282,9 +323,10 @@
     </div>
 
     <footer>
-        v3.0 | A360 BotKit | A. K.
+        v3.2 | A360 BotKit | A. K.
     </footer>
 
+    <script src="package_versions.js"></script>
     <script src="popup.js"></script>
 </body>
 

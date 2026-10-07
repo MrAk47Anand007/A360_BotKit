@@ -11,6 +11,56 @@ import {
     createRepositoryAsset,
     putRepositoryAssetContent,
 } from '../background/control_room.js';
+import { scanFolderPackages, getPackageVersions } from './package_versions.js';
+import { runPackageVersionJob } from './package_version_job.js';
+
+const PACKAGE_JOB_KEY = 'botkit-package-version-job';
+let packageJobRunning = false;
+
+async function getPackageJob() {
+    const stored = await chrome.storage.session.get(PACKAGE_JOB_KEY);
+    const job = stored[PACKAGE_JOB_KEY] || null;
+    // A browser/worker restart must never silently resume writes with stale state.
+    if (job?.state === 'running' && !packageJobRunning) {
+        job.state = 'interrupted';
+        job.error = 'Update interrupted. Scan again to check current versions before retrying.';
+        await chrome.storage.session.set({ [PACKAGE_JOB_KEY]: job });
+    }
+    return job;
+}
+
+async function startPackageJob(request) {
+    if (packageJobRunning) throw new Error('A package update is already running');
+    if (!Array.isArray(request.bots) || !request.bots.length || !request.packageName || !request.version) {
+        throw new Error('Select bots, a package, and a version');
+    }
+    const uniqueBots = [...new Map(request.bots.map(bot => [String(bot.id), bot])).values()];
+    if (uniqueBots.some(bot => !/^\d+$/.test(String(bot.id)) || typeof bot.expectedVersion !== 'string')) {
+        throw new Error('Invalid bot selection. Scan again.');
+    }
+    const jobRequest = { id: crypto.randomUUID(), origin: request.origin, folderID: request.folderID,
+        folderName: request.folderName, packageName: request.packageName, version: request.version,
+        bots: uniqueBots.map(bot => ({ id: String(bot.id), name: bot.name, path: bot.path, expectedVersion: bot.expectedVersion })) };
+    packageJobRunning = true;
+    try {
+        const { bots: selectedBots, ...jobDetails } = jobRequest;
+        const initial = { ...jobDetails, state: 'running', total: selectedBots.length, completed: 0, results: [] };
+        await chrome.storage.session.set({ [PACKAGE_JOB_KEY]: initial });
+        let latestJob = initial;
+        // Background ownership lets the popup close without cancelling the batch.
+        runPackageVersionJob(jobRequest, request.authToken, job => {
+            latestJob = structuredClone(job);
+            return chrome.storage.session.set({ [PACKAGE_JOB_KEY]: latestJob });
+        })
+            .catch(async error => {
+                await chrome.storage.session.set({ [PACKAGE_JOB_KEY]: { ...latestJob, state: 'failed', error: error.message } });
+            }).finally(() => { packageJobRunning = false; });
+        return { success: true, job: initial };
+    } catch (error) {
+        packageJobRunning = false;
+        throw error;
+    }
+}
 
 /**
  * Backgound worker which will listener different actions/messages from extension.
@@ -19,6 +69,20 @@ import {
 (async function () {
     // Event listener for messages from other parts of the extension
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (['scanFolderPackages', 'getPackageVersions', 'startPackageVersionUpdate', 'getPackageVersionJob'].includes(request.action)) {
+        const task = async () => {
+            if (request.action === 'getPackageVersionJob') return { success: true, job: await getPackageJob() };
+            const url = new URL(request.origin);
+            if (!['https:', 'http:'].includes(url.protocol) || url.origin !== request.origin || !request.authToken) {
+                throw new Error('Open an authenticated Control Room folder');
+            }
+            if (request.action === 'scanFolderPackages') return { success: true, scan: await scanFolderPackages(request.origin, request.folderID, request.authToken) };
+            if (request.action === 'getPackageVersions') return { success: true, versions: await getPackageVersions(request.origin, request.packageName, request.authToken) };
+            return startPackageJob(request);
+        };
+        task().then(sendResponse).catch(error => sendResponse({ success: false, error: error.message }));
+        return true;
+    }
         if (request.action === "getBotContent") {
             // Handle request to get bot content
             getBotContent(request.origin, request.fileID, request.authToken)

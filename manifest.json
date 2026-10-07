@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "A360 BotKit",
-  "version": "3.0",
-  "description": "Enhances Automation Anywhere A360 bot editing in Control Room with line updates, copy and patch tools, and autosave.",
+  "version": "3.2",
+  "description": "A360 Control Room tools for bot editing, folder export/import, autosave, and bulk package version updates.",
   "permissions": [
     "activeTab",
     "storage",

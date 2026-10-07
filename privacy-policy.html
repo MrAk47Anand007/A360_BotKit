@@ -137,7 +137,7 @@
 <div class="page">
     <div class="eyebrow">A360 BotKit</div>
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: April 20, 2026</p>
+    <p class="updated">Last updated: October 7, 2026</p>
 
     <div class="summary">
         <p><strong>Short version:</strong> A360 BotKit is a Chrome extension for editing Automation Anywhere A360 bots inside Control Room. It uses your current browser session to read bot editor data and send bot updates back to your own A360 Control Room. It does not sell data, run analytics, or send your bot data to the developer.</p>
@@ -150,18 +150,19 @@
 
     <div class="section">
         <h2>2. What the extension is for</h2>
-        <p>A360 BotKit has a single purpose: improving Automation Anywhere A360 bot editing inside Control Room. It provides tools for line-number updates, copy and patch workflows, and autosave.</p>
+        <p>A360 BotKit has a single purpose: helping developers maintain Automation Anywhere A360 bots inside their Control Room. It provides line-number updates, copy and patch workflows, autosave, folder export/import, and bulk package version updates.</p>
     </div>
 
     <div class="section">
         <h2>3. What data the extension handles</h2>
-        <p>The extension may access the following data when you use it on an A360 bot editor page:</p>
+        <p>The extension may access the following data when you use it on an A360 bot editor or repository folder page:</p>
         <ul>
-            <li>the current page URL and bot file ID</li>
+            <li>the current page URL, bot and folder IDs, repository names and paths, file permissions, and package declarations and versions</li>
             <li>the A360 auth token already present in your browser session</li>
             <li>bot JSON returned by your A360 Control Room</li>
             <li>current unsaved editor data used for autosave</li>
             <li>extension settings such as autosave preferences and theme preference</li>
+            <li>local export bundles you choose to import, and package-update progress and per-bot results</li>
         </ul>
         <p>The extension does not ask for your A360 password and does not operate its own login system.</p>
     </div>
@@ -175,6 +176,10 @@
             <li>copying bot JSON to your clipboard</li>
             <li>patching a bot from valid JSON you provide</li>
             <li>running native or silent autosave inside the current editor</li>
+            <li>exporting repository folders and supported assets to a file you download</li>
+            <li>importing your selected bundle into the current Control Room folder</li>
+            <li>scanning Task Bots and subfolders, listing package versions, previewing changes, and saving the package version you select</li>
+            <li>downloading package-update result reports</li>
             <li>showing status information in the popup and on the A360 page</li>
         </ul>
     </div>
@@ -190,6 +195,8 @@
         <ul>
             <li><strong>Theme preference:</strong> stored in extension local storage as <code>botkit-theme</code></li>
             <li><strong>Autosave settings:</strong> stored in <code>chrome.storage.local</code> under the extension's storage area</li>
+            <li><strong>Package-update reports:</strong> job status, bot names and IDs, folder names and IDs, Control Room origin, paths, package versions, timestamps, and error/result messages are stored in <code>chrome.storage.session</code>. The latest job replaces the prior report; these records are cleared when the extension is reloaded or disabled, or the browser restarts. Auth tokens and full bot JSON are excluded from these reports.</li>
+            <li><strong>Files you download:</strong> exported bot bundles and result reports are saved to your computer at your request. They remain until you delete them, and can contain confidential repository or bot data.</li>
         </ul>
         <p>The extension does not intentionally persist your bot content or auth token in its own long-term storage.</p>
     </div>
@@ -200,10 +207,16 @@
         <p>Used so the popup can interact with the current tab when you run extension features.</p>
 
         <h3>storage</h3>
-        <p>Used to save autosave settings locally in Chrome.</p>
+        <p>Used to save autosave settings locally and retain package-update progress in session storage while the popup is closed.</p>
 
-        <h3>HTTPS page access</h3>
-        <p>A360 Control Room can be hosted on many different customer domains. For that reason, the extension is packaged to work across HTTPS sites. In practice, its bot-editing behavior is limited by runtime checks to supported A360 bot editor pages.</p>
+        <h3>downloads</h3>
+        <p>Used to save user-requested repository export bundles and package-update result reports to your computer.</p>
+
+        <h3>scripting</h3>
+        <p>Used to inject the packaged content helper into the active Control Room tab when needed, for example when the tab was already open when the extension was installed.</p>
+
+        <h3>HTTP and HTTPS page access</h3>
+        <p>A360 Control Room can be hosted on customer-specific domains, including local HTTP development environments. The packaged content helper matches HTTP and HTTPS pages and uses URL checks to activate its Control Room features on supported editor and repository routes. The extension does not record general browsing history.</p>
     </div>
 
     <div class="section">
@@ -214,7 +227,7 @@
 
     <div class="section">
         <h2>9. Security</h2>
-        <p>The extension communicates with A360 over your existing HTTPS session. We recommend using the extension only on trusted devices and following your organization's A360 security practices.</p>
+        <p>The extension communicates with your current Control Room origin using your existing session. HTTPS is recommended; HTTP development environments do not provide encrypted transport. Use the extension only on trusted devices and follow your organization's A360 security practices.</p>
     </div>
 
     <div class="section">

@@ -64,6 +64,35 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+/* Package updates use compact rows so nested bot names stay easy to scan. */
+[hidden] { display: none !important; }
+.version-context { font-size: 12px; font-weight: 600; margin: 12px 0 8px; overflow-wrap: anywhere; }
+.version-status { font-size: 11px; margin: 10px 0; overflow-wrap: anywhere; }
+.version-section-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 18px 0 8px; }
+.version-section-heading h2 { font-size: 12px; font-weight: 600; }
+.version-section-heading > span { font-size: 10px; color: var(--muted-foreground); white-space: nowrap; }
+#VersionUpdateAction input[type="search"] { width: 100%; padding: 8px 10px; border: 1px solid var(--input); border-radius: var(--radius); background: var(--card); color: var(--foreground); font: inherit; font-size: 12px; }
+#VersionUpdateAction input[type="checkbox"] { width: 14px; height: 14px; flex: 0 0 14px; margin-top: 3px; accent-color: var(--primary); }
+#VersionUpdateAction select { margin: 5px 0 8px; }
+#VersionUpdateAction button { margin-top: 8px; }
+.version-select-all { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0; font-size: 11px; }
+.version-bot-list { max-height: 180px; overflow-y: auto; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.version-bot-row { display: flex; gap: 9px; padding: 9px 3px; margin: 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.version-bot-row:last-child, .version-result-row:last-child { border-bottom: 0; }
+.version-bot-row:has(input:checked) { background: var(--secondary); }
+.version-bot-row:has(input:disabled) { cursor: default; }
+.version-row-detail { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+.version-row-detail strong, .version-result-row strong { font-size: 11px; font-weight: 600; overflow-wrap: anywhere; }
+.version-muted { color: var(--muted-foreground); font-size: 10px; overflow-wrap: anywhere; }
+.version-error { color: var(--destructive); font-size: 11px; }
+.version-usage { max-height: 110px; overflow-y: auto; margin: 2px 0 12px; }
+.version-usage-row { font-size: 10px; font-family: var(--font-mono); padding: 2px 0; overflow-wrap: anywhere; }
+.version-preview { margin-top: 12px; }
+#versionPreviewSummary { font-size: 11px; margin-bottom: 8px; }
+.version-result-row { display: flex; flex-direction: column; gap: 3px; padding: 8px 3px; border-bottom: 1px solid var(--border); }
+#versionJobProgress { width: 100%; height: 6px; accent-color: var(--primary); margin-bottom: 10px; }
+#VersionUpdateAction button:focus-visible, #VersionUpdateAction input:focus-visible, #VersionUpdateAction select:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+
 .header {
     background-color: var(--card);
     padding: 12px 14px;

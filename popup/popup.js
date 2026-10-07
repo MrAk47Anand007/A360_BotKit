@@ -214,12 +214,14 @@ document.addEventListener('DOMContentLoaded', () => {
         copyBotActionTab: document.getElementById('copyBotActionTab'),
         exportBotTab: document.getElementById('exportBotTab'),
         importActionTab: document.getElementById('importActionTab'),
+        versionUpdateTab: document.getElementById('versionUpdateTab'),
         settingsTab: document.getElementById('settingsTab'),
 
         logActionContent: document.getElementById('LogAction'),
         copyBotActionContent: document.getElementById('CopyBotAction'),
         exportBotActionContent: document.getElementById('ExportBotAction'),
         importActionContent: document.getElementById('ImportAction'),
+        versionUpdateContent: document.getElementById('VersionUpdateAction'),
         settingsContent: document.getElementById('SettingsAction'),
 
         pageStatus: document.getElementById('pageStatus'),
@@ -380,6 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
             [elements.copyBotActionTab, elements.copyBotActionContent, 'CopyBotAction'],
             [elements.exportBotTab, elements.exportBotActionContent, 'ExportBotAction'],
             [elements.importActionTab, elements.importActionContent, 'ImportAction'],
+            [elements.versionUpdateTab, elements.versionUpdateContent, 'VersionUpdateAction'],
             [elements.settingsTab, elements.settingsContent, 'SettingsAction'],
         ];
 
@@ -394,7 +397,9 @@ document.addEventListener('DOMContentLoaded', () => {
     elements.copyBotActionTab.addEventListener('click', () => switchTab('CopyBotAction'));
     elements.exportBotTab.addEventListener('click', () => switchTab('ExportBotAction'));
     elements.importActionTab.addEventListener('click', () => switchTab('ImportAction'));
+    elements.versionUpdateTab.addEventListener('click', () => switchTab('VersionUpdateAction'));
     elements.settingsTab.addEventListener('click', () => switchTab('SettingsAction'));
+    initPackageVersionTab({ getTabDetails, runtimeSendMessage });
 
     function renderHeaderBadge(status = {}) {
         const badgeTone = status.badgeTone || 'gray';
