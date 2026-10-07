@@ -7,7 +7,8 @@ const DEFAULT_AUTOSAVE_SETTINGS = {
 };
 const ALLOWED_AUTOSAVE_DELAYS = new Set([3000, 5000, 10000, 15000]);
 const ALLOWED_AUTOSAVE_MODES = new Set(['native', 'silent']);
-const BOT_EDITOR_URL_REGEX = /#\/bots\/repository\/private\/.*\/\d+\/edit$/;
+const BOT_EDITOR_PATH_REGEX = /^\/bots\/repository\/(?:private|public)\/.+\/(\d+)\/edit$/;
+const BOT_FOLDER_PATH_REGEX = /^\/bots\/repository\/(?:private|public)\/folders\/(\d+)$/;
 const BRIDGE_SCRIPT_ID = 'a360-botkit-page-bridge';
 const BRIDGE_REQUEST_EVENT = 'A360_BOTKIT_PAGE_REQUEST';
 const BRIDGE_RESPONSE_EVENT = 'A360_BOTKIT_PAGE_RESPONSE';
@@ -46,13 +47,48 @@ function normalizeAutosaveSettings(settings = {}) {
     };
 }
 
+function getA360HashPath(url = window.location.href) {
+    try {
+        const parsedUrl = new URL(url, window.location.origin);
+        const hash = parsedUrl.hash || '';
+        const normalizedHash = hash.startsWith('#') ? hash.slice(1) : hash;
+        return normalizedHash.split('?')[0] || '';
+    } catch (error) {
+        const [, hash = ''] = String(url).split('#', 2);
+        return hash.split('?')[0] ? `/${hash.split('?')[0].replace(/^\/?/, '')}` : '';
+    }
+}
+
+function isA360BotRoute(url = window.location.href) {
+    return BOT_EDITOR_PATH_REGEX.test(getA360HashPath(url));
+}
+
+function isA360FolderRoute(url = window.location.href) {
+    return BOT_FOLDER_PATH_REGEX.test(getA360HashPath(url));
+}
+
+function hasEditorChrome() {
+    return Boolean(getEditorPage() && getSaveButton());
+}
+
 function isA360BotPage(url = window.location.href) {
-    return BOT_EDITOR_URL_REGEX.test(url);
+    return isA360BotRoute(url) || Boolean(getFileIdFromUrl(url)) || hasEditorChrome();
+}
+
+function isA360FolderPage(url = window.location.href) {
+    return isA360FolderRoute(url);
 }
 
 function getFileIdFromUrl(url = window.location.href) {
-    const parts = url.split('/');
-    return parts.length >= 2 ? parts.at(-2) : null;
+    const hashPath = getA360HashPath(url);
+    const match = hashPath.match(/\/(\d+)\/edit$/) ||
+        hashPath.match(/\/(?:task|file|bot|workflow|form)\/(\d+)(?:\/|$)/);
+    return match?.[1] || null;
+}
+
+function getFolderIdFromUrl(url = window.location.href) {
+    const match = getA360HashPath(url).match(BOT_FOLDER_PATH_REGEX);
+    return match?.[1] || null;
 }
 
 function getCurrentFileKey(url = window.location.href) {
@@ -96,6 +132,32 @@ function setAutosaveStatus(status, detail, mode = autosaveState.settings.mode) {
     autosaveState.status = status;
     autosaveState.statusDetail = detail;
     autosaveState.lastModeUsed = mode;
+}
+
+function hasActiveExtensionContext() {
+    try {
+        return Boolean(chrome?.runtime?.id);
+    } catch (error) {
+        return false;
+    }
+}
+
+function isExtensionContextInvalidatedError(error) {
+    return /extension context invalidated/i.test(error?.message || '');
+}
+
+function handleInvalidatedExtensionContext() {
+    clearSaveTimeout();
+    clearSaveMonitor();
+    stopAutosaveWatcher();
+    autosaveState.bridgeReadyPromise = null;
+    autosaveState.lastError = null;
+    setAutosaveStatus('inactive', 'Extension reloaded. Refresh this A360 page to resume autosave.');
+
+    const container = document.getElementById(TOAST_CONTAINER_ID);
+    if (container) {
+        container.remove();
+    }
 }
 
 function ensureToastContainer() {
@@ -328,6 +390,10 @@ function resetAutosaveCache(fileKey) {
 }
 
 function ensurePageBridge() {
+    if (!hasActiveExtensionContext()) {
+        return Promise.reject(new Error('Extension context invalidated'));
+    }
+
     if (autosaveState.bridgeReadyPromise) {
         return autosaveState.bridgeReadyPromise;
     }
@@ -408,6 +474,11 @@ function getRuntimeContext() {
 
 function sendRuntimeMessage(message) {
     return new Promise((resolve, reject) => {
+        if (!hasActiveExtensionContext()) {
+            reject(new Error('Extension context invalidated'));
+            return;
+        }
+
         chrome.runtime.sendMessage(message, (response) => {
             if (chrome.runtime.lastError) {
                 reject(new Error(chrome.runtime.lastError.message));
@@ -659,6 +730,11 @@ async function triggerAutosave() {
         try {
             await runSilentAutosave();
         } catch (error) {
+            if (isExtensionContextInvalidatedError(error)) {
+                handleInvalidatedExtensionContext();
+                return;
+            }
+
             autosaveState.lastError = error.message;
 
             if (autosaveState.settings.fallbackToNative && triggerNativeAutosave(true)) {
@@ -707,6 +783,11 @@ function syncAutosaveState(reason = 'passive') {
 }
 
 function loadAutosaveSettings() {
+    if (!hasActiveExtensionContext()) {
+        handleInvalidatedExtensionContext();
+        return;
+    }
+
     if (!chrome?.storage?.local) {
         autosaveState.settings = DEFAULT_AUTOSAVE_SETTINGS;
         scheduleSync(0, 'passive');
@@ -720,7 +801,7 @@ function loadAutosaveSettings() {
 }
 
 function startAutosaveWatcher() {
-    if (autosaveState.observer || !document.body) {
+    if (autosaveState.observer || !document.body || !hasActiveExtensionContext()) {
         return;
     }
 
@@ -778,26 +859,34 @@ function handleLocationChange() {
     refreshStatusFromPageState();
 }
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'getTabDetails') {
-        const origin = window.location.origin;
-        const fileID = window.location.toString().split('/').slice(-2)[0];
-        const url = window.location.href;
+if (hasActiveExtensionContext()) {
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'getTabDetails') {
+            const origin = window.location.origin;
+            const url = window.location.href;
+            const fileID = isA360BotPage(url) ? getFileIdFromUrl(url) : null;
+            const folderID = isA360FolderPage(url) ? getFolderIdFromUrl(url) : null;
+            const pageType = isA360BotPage(url)
+                ? 'bot'
+                : isA360FolderPage(url)
+                    ? 'folder'
+                    : 'other';
 
-        Promise.resolve(localStorage.authToken ? localStorage.authToken.toString() : null)
-            .then((authToken) => {
-                sendResponse({origin, fileID, authToken, url});
-            });
+            Promise.resolve(localStorage.authToken ? localStorage.authToken.toString() : null)
+                .then((authToken) => {
+                    sendResponse({origin, fileID, folderID, pageType, authToken, url});
+                });
 
-        return true;
-    }
+            return true;
+        }
 
-    if (request.action === 'getAutosaveStatus') {
-        sendResponse(getAutosaveStatusSnapshot());
-    }
-});
+        if (request.action === 'getAutosaveStatus') {
+            sendResponse(getAutosaveStatusSnapshot());
+        }
+    });
+}
 
-if (chrome?.storage?.onChanged) {
+if (hasActiveExtensionContext() && chrome?.storage?.onChanged) {
     chrome.storage.onChanged.addListener((changes, areaName) => {
         if (areaName !== 'local' || !changes[AUTOSAVE_STORAGE_KEY]) {
             return;

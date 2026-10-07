@@ -1,11 +1,15 @@
 import {
     calculateTotalLines,
     updateLogMessages,
-    countLinesAccurately,
     getBotContent,
     putBotJSONContent,
     putBotJSONContentPaste,
     silentSaveBot,
+    getFolderExportPreview,
+    getFolderBotExportBundle,
+    createFolder,
+    createRepositoryAsset,
+    putRepositoryAssetContent,
 } from '../background/control_room.js';
 
 /**
@@ -107,6 +111,61 @@ import {
                 })
                 .catch((error) => {
                     console.error("Error in silentSaveBot:", error);
+                    sendResponse({ success: false, error: error.message });
+                });
+        } else if (request.action === "getFolderExportPreview") {
+            let { origin, folderID, authToken } = request;
+
+            getFolderExportPreview(origin, folderID, authToken)
+                .then((previewResponse) => {
+                    sendResponse(previewResponse);
+                })
+                .catch((error) => {
+                    console.error("Error in getFolderExportPreview:", error);
+                    sendResponse({ success: false, error: error.message });
+                });
+        } else if (request.action === "getFolderBotExportBundle") {
+            let { origin, folderID, authToken } = request;
+
+            getFolderBotExportBundle(origin, folderID, authToken)
+                .then((bundleResponse) => {
+                    sendResponse(bundleResponse);
+                })
+                .catch((error) => {
+                    console.error("Error in getFolderBotExportBundle:", error);
+                    sendResponse({ success: false, error: error.message });
+                });
+        } else if (request.action === "createRepositoryFolder") {
+            let { origin, parentFolderID, folderName, authToken } = request;
+
+            createFolder(origin, parentFolderID, folderName, authToken)
+                .then((folderResponse) => {
+                    sendResponse(folderResponse);
+                })
+                .catch((error) => {
+                    console.error("Error in createRepositoryFolder:", error);
+                    sendResponse({ success: false, error: error.message });
+                });
+        } else if (request.action === "createRepositoryAsset") {
+            let { origin, parentFolderID, asset, authToken } = request;
+
+            createRepositoryAsset(origin, parentFolderID, asset, authToken)
+                .then((assetResponse) => {
+                    sendResponse(assetResponse);
+                })
+                .catch((error) => {
+                    console.error("Error in createRepositoryAsset:", error);
+                    sendResponse({ success: false, error: error.message });
+                });
+        } else if (request.action === "putRepositoryAssetContent") {
+            let { origin, fileID, assetType, content, authToken } = request;
+
+            putRepositoryAssetContent(origin, fileID, assetType, content, authToken)
+                .then((contentResponse) => {
+                    sendResponse(contentResponse);
+                })
+                .catch((error) => {
+                    console.error("Error in putRepositoryAssetContent:", error);
                     sendResponse({ success: false, error: error.message });
                 });
         } else {

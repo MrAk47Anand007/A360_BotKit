@@ -286,6 +286,451 @@ export async function silentSaveBot(origin, fileID, payload, authToken) {
     };
 }
 
+export async function getFolderDetails(origin, folderID, authToken) {
+    const folderUrl = `${origin}/v2/repository/folders/${folderID}`;
+    const headers = new Headers();
+    headers.append("Accept", "application/json");
+    headers.append("X-Authorization", normalizeAuthToken(authToken));
+
+    try {
+        const response = await fetch(folderUrl, {
+            method: "GET",
+            headers,
+        });
+        if (!response.ok) {
+            throw new Error("Failed to fetch folder details");
+        }
+
+        const folder = await response.json();
+        return { success: true, folder };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: error.message };
+    }
+}
+
+const EXPORTABLE_ASSET_TYPES = {
+    "application/vnd.aa.taskbot": {
+        label: "Task Bot",
+        fileSuffix: "taskbot.json",
+        putContentType: "application/json",
+    },
+    "application/vnd.aa.form": {
+        label: "Form",
+        fileSuffix: "form.json",
+        putContentType: "application/vnd.aa.form",
+    },
+    "application/vnd.aa.workflow": {
+        label: "Process",
+        fileSuffix: "workflow.json",
+        putContentType: "application/vnd.aa.workflow",
+    },
+};
+
+function getImportAssetTypeConfig(assetType) {
+    return EXPORTABLE_ASSET_TYPES[assetType] || null;
+}
+
+export async function getFolderChildren(origin, folderID, authToken) {
+    const childrenUrl = `${origin}/v2/repository/folders/${folderID}/children`;
+    const headers = new Headers();
+    headers.append("Accept", "application/json");
+    headers.append("X-Authorization", normalizeAuthToken(authToken));
+
+    try {
+        const response = await fetch(childrenUrl, {
+            method: "GET",
+            headers,
+        });
+        if (!response.ok) {
+            throw new Error("Failed to fetch child folders");
+        }
+
+        const json = await response.json();
+        const children = Array.isArray(json?.list) ? json.list : Array.isArray(json) ? json : [];
+        return { success: true, children };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function listFolderItems(origin, folderID, authToken) {
+    const listUrl = `${origin}/v2/repository/folders/${folderID}/list`;
+    const headers = new Headers();
+    headers.append("Accept", "application/json");
+    headers.append("Content-Type", "application/json");
+    headers.append("X-Authorization", normalizeAuthToken(authToken));
+
+    const collected = [];
+    let offset = 0;
+    const length = 100;
+    const modernSort = [
+        { field: "directory", direction: "asc" },
+        { field: "typeLabel", direction: "asc" },
+        { field: "name", direction: "asc" }
+    ];
+    const legacySort = [
+        { field: "directory", direction: "asc" },
+        { field: "type", direction: "asc" },
+        { field: "name", direction: "asc" }
+    ];
+
+    async function fetchListPage(sort) {
+        const response = await fetch(listUrl, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                fields: [],
+                filter: null,
+                sort,
+                page: {
+                    offset,
+                    length,
+                }
+            }),
+        });
+
+        const json = await parseResponseBody(response);
+        return { response, json };
+    }
+
+    try {
+        while (true) {
+            let { response, json } = await fetchListPage(modernSort);
+            if (!response.ok) {
+                const legacyResult = await fetchListPage(legacySort);
+                response = legacyResult.response;
+                json = legacyResult.json;
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    json?.message ||
+                    json?.error ||
+                    "Failed to list folder items"
+                );
+            }
+
+            const items = Array.isArray(json?.list) ? json.list : [];
+            collected.push(...items);
+            if (items.length < length) {
+                break;
+            }
+            offset += length;
+        }
+
+        return { success: true, items: collected };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: error.message };
+    }
+}
+
+async function collectExportableAssetsRecursively(origin, authToken, folder, relativeFolders = []) {
+    const listResponse = await listFolderItems(origin, folder.id, authToken);
+    if (!listResponse.success) {
+        throw new Error(listResponse.error || `Failed to list folder ${folder.id}`);
+    }
+
+    const folderChildrenResponse = await getFolderChildren(origin, folder.id, authToken);
+    if (!folderChildrenResponse.success) {
+        throw new Error(folderChildrenResponse.error || `Failed to get children for ${folder.id}`);
+    }
+
+    const assetEntries = listResponse.items
+        .filter((item) => EXPORTABLE_ASSET_TYPES[item?.type])
+        .map((item) => ({
+            id: item.id,
+            folderId: folder.id,
+            name: item.name || `asset-${item.id}`,
+            relativeFolders,
+            exportPath: [
+                ...relativeFolders,
+                `${item.name || item.id}.${EXPORTABLE_ASSET_TYPES[item.type].fileSuffix}`
+            ],
+            metadata: {
+                size: item.size || "",
+                lastModified: item.lastModified || "",
+                type: item.type,
+                typeLabel: item.typeLabel || EXPORTABLE_ASSET_TYPES[item.type].label,
+                botStatus: item.botStatus || "",
+                platform: item.latestTargetPlatform || item.platform || "",
+            }
+        }));
+
+    let assets = [...assetEntries];
+    let foldersVisited = 1;
+    let childFolderCount = 0;
+
+    for (const childFolder of folderChildrenResponse.children) {
+        if (childFolder?.type !== "application/vnd.aa.directory") {
+            continue;
+        }
+
+        childFolderCount += 1;
+        const childResult = await collectExportableAssetsRecursively(
+            origin,
+            authToken,
+            childFolder,
+            [...relativeFolders, childFolder.name || childFolder.id]
+        );
+        foldersVisited += childResult.foldersVisited;
+        childFolderCount += childResult.childFolderCount;
+        assets = assets.concat(childResult.assets);
+    }
+
+    return {
+        foldersVisited,
+        childFolderCount,
+        assets,
+    };
+}
+
+async function withConcurrency(items, limit, iteratee) {
+    const results = [];
+    let index = 0;
+
+    async function worker() {
+        while (index < items.length) {
+            const currentIndex = index;
+            index += 1;
+            results[currentIndex] = await iteratee(items[currentIndex], currentIndex);
+        }
+    }
+
+    const workers = Array.from({ length: Math.min(limit, items.length || 1) }, () => worker());
+    await Promise.all(workers);
+    return results;
+}
+
+export async function getFolderExportPreview(origin, folderID, authToken) {
+    const folderResponse = await getFolderDetails(origin, folderID, authToken);
+    if (!folderResponse.success) {
+        return folderResponse;
+    }
+
+    try {
+        const tree = await collectExportableAssetsRecursively(origin, authToken, folderResponse.folder, []);
+        const byType = Object.keys(EXPORTABLE_ASSET_TYPES).reduce((result, type) => {
+            result[type] = 0;
+            return result;
+        }, {});
+        tree.assets.forEach((asset) => {
+            byType[asset.metadata.type] = (byType[asset.metadata.type] || 0) + 1;
+        });
+        return {
+            success: true,
+            folder: {
+                id: folderResponse.folder.id,
+                name: folderResponse.folder.name || `folder-${folderID}`,
+                path: folderResponse.folder.path || "",
+            },
+            totals: {
+                assets: tree.assets.length,
+                taskBots: byType["application/vnd.aa.taskbot"] || 0,
+                forms: byType["application/vnd.aa.form"] || 0,
+                workflows: byType["application/vnd.aa.workflow"] || 0,
+                foldersVisited: tree.foldersVisited,
+                childFolders: tree.childFolderCount,
+            }
+        };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function getFolderBotExportBundle(origin, folderID, authToken) {
+    const folderResponse = await getFolderDetails(origin, folderID, authToken);
+    if (!folderResponse.success) {
+        return folderResponse;
+    }
+
+    try {
+        const tree = await collectExportableAssetsRecursively(origin, authToken, folderResponse.folder, []);
+        const failures = [];
+
+        const exports = await withConcurrency(tree.assets, 3, async (asset) => {
+            const contentResponse = await getBotContent(origin, asset.id, authToken);
+            if (!contentResponse.success) {
+                failures.push({
+                    id: asset.id,
+                    name: asset.name,
+                    error: "Failed to fetch asset content",
+                });
+                return null;
+            }
+
+            return {
+                ...asset,
+                content: contentResponse.botContent,
+            };
+        });
+
+        const items = exports.filter(Boolean);
+        const byType = Object.keys(EXPORTABLE_ASSET_TYPES).reduce((result, type) => {
+            result[type] = 0;
+            return result;
+        }, {});
+        items.forEach((item) => {
+            byType[item.metadata.type] = (byType[item.metadata.type] || 0) + 1;
+        });
+        return {
+            success: true,
+            bundle: {
+                exportedAt: new Date().toISOString(),
+                folder: {
+                    id: folderResponse.folder.id,
+                    name: folderResponse.folder.name || `folder-${folderID}`,
+                    path: folderResponse.folder.path || "",
+                },
+                totals: {
+                    assetsDiscovered: tree.assets.length,
+                    assetsExported: items.length,
+                    failedAssets: failures.length,
+                    taskBots: byType["application/vnd.aa.taskbot"] || 0,
+                    forms: byType["application/vnd.aa.form"] || 0,
+                    workflows: byType["application/vnd.aa.workflow"] || 0,
+                    foldersVisited: tree.foldersVisited,
+                    childFolders: tree.childFolderCount,
+                },
+                items,
+                failures,
+            }
+        };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function createFolder(origin, parentFolderID, folderName, authToken) {
+    const createUrl = `${origin}/v2/repository/folders/${parentFolderID}`;
+    const headers = new Headers();
+    headers.append("Accept", "application/json");
+    headers.append("Content-Type", "application/json");
+    headers.append("X-Authorization", normalizeAuthToken(authToken));
+
+    try {
+        const response = await fetch(createUrl, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+                folderName,
+            }),
+        });
+        const json = await parseResponseBody(response);
+        if (!response.ok) {
+            const fallbackChildrenResponse = await getFolderChildren(origin, parentFolderID, authToken);
+            if (fallbackChildrenResponse.success) {
+                const matchingFolder = fallbackChildrenResponse.children.find((child) =>
+                    child?.type === "application/vnd.aa.directory" &&
+                    child?.name === folderName
+                );
+                if (matchingFolder) {
+                    return { success: true, folder: matchingFolder, reused: true };
+                }
+            }
+
+            throw new Error(
+                json?.message ||
+                json?.error ||
+                `Failed to create folder ${folderName}`
+            );
+        }
+
+        return { success: true, folder: json };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function createRepositoryAsset(origin, parentFolderID, asset, authToken) {
+    const assetType = asset?.type;
+    const typeConfig = getImportAssetTypeConfig(assetType);
+    if (!typeConfig) {
+        return { success: false, error: `Unsupported asset type: ${assetType || "unknown"}` };
+    }
+
+    const createUrl = `${origin}/v2/repository/files`;
+    const headers = new Headers();
+    headers.append("Accept", "application/json");
+    headers.append("Content-Type", "application/json");
+    headers.append("X-Authorization", normalizeAuthToken(authToken));
+
+    const payload = {
+        name: asset?.name || "Imported Asset",
+        contentType: assetType,
+        description: asset?.description || "",
+        parentFolderId: parentFolderID,
+    };
+
+    if (assetType === "application/vnd.aa.taskbot") {
+        const platform = String(asset?.platform || "WINDOWS").toUpperCase();
+        payload.tags = [{
+            namespace: "INTENDED_TARGET",
+            value: platform,
+        }];
+    }
+
+    try {
+        const response = await fetch(createUrl, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(payload),
+        });
+        const json = await parseResponseBody(response);
+        if (!response.ok) {
+            throw new Error(
+                json?.message ||
+                json?.error ||
+                `Failed to create ${typeConfig.label.toLowerCase()} ${payload.name}`
+            );
+        }
+
+        return { success: true, asset: json };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function putRepositoryAssetContent(origin, fileID, assetType, content, authToken) {
+    const typeConfig = getImportAssetTypeConfig(assetType);
+    if (!typeConfig) {
+        return { success: false, error: `Unsupported asset type: ${assetType || "unknown"}` };
+    }
+
+    const contentUrl = `${origin}/v2/repository/files/${fileID}/content?hasErrors=false`;
+    const headers = new Headers();
+    headers.append("Accept", "application/json");
+    headers.append("Content-Type", typeConfig.putContentType);
+    headers.append("X-Authorization", normalizeAuthToken(authToken));
+
+    try {
+        const response = await fetch(contentUrl, {
+            method: "PUT",
+            headers,
+            body: JSON.stringify(content),
+        });
+        const json = await parseResponseBody(response);
+        if (!response.ok) {
+            throw new Error(
+                json?.message ||
+                json?.error ||
+                `Failed to import content for file ${fileID}`
+            );
+        }
+
+        return { success: true, result: json };
+    } catch (error) {
+        console.error(error);
+        return { success: false, error: error.message };
+    }
+}
+
 /**
  * Function to count lines in the bot content
  * @param {*} node object - Node is the object of content which extracted from bot
